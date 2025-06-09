@@ -41,7 +41,7 @@ function activeClass($filterName, $currentFilter) {
   <meta charset="UTF-8">
   <link rel="stylesheet" href="notifEmp.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/LOGO for title.png">
+  <link rel="icon" href="assets\logo.png">
   <title>Asian College EIS</title>
 </head>
 <body>
@@ -49,7 +49,7 @@ function activeClass($filterName, $currentFilter) {
     <h2>Asian College EIS Notifications</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
-      <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
+      <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
         <li><a href="HOMEEMP.php">🏠 Home</a></li>
         <li><a href="NOTIFEMP.php">🔔 Notifications</a></li>
@@ -98,17 +98,17 @@ function activeClass($filterName, $currentFilter) {
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
       if (menuOpen) {
-        menuBtn.src = 'assets/closeIcon.png'; 
+        menuBtn.src = 'assets/black_closeIcon.png'; 
         menuItems.classList.add('menuOpen');
       } else {
-        menuBtn.src = 'assets/menuIcon.png'; 
+        menuBtn.src = 'assets/black_menuIcon.png'; 
         menuItems.classList.remove('menuOpen');
       }
     });
 
     menuItems.addEventListener('click', () => {
       menuOpen = false;
-      menuBtn.src = 'assets/menuIcon.png';
+      menuBtn.src = 'assets/black_menuIcon.png';
       menuItems.classList.remove('menuOpen');
     });
 
