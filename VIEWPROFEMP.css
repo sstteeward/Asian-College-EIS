@@ -1,0 +1,278 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  height: 100%;
+  font-family: Arial, sans-serif;
+background: linear-gradient(to right, #dcefff, #f3f9ff);}
+
+.top-nav {
+background: linear-gradient(to right, #dcefff, #f3f9ff);  color: white;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.top-nav img {
+  width: 50px;
+  height: auto;
+}
+
+.top-nav h2 {
+  margin: 0;
+  font-size: 24px;
+  color: black;
+}
+
+.top-nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.top-nav ul li {
+  margin-left: 30px;
+}
+
+.top-nav ul li a {
+  color: black;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.top-nav ul li a:hover {
+  background-color: #e11d48;
+}
+
+.menuBtn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .top-nav ul {
+    display: none;
+  }
+
+  .menuBtn {
+    display: block;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+  }
+
+  .menuItems.menuOpen {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: linear-gradient(to right, #e3f2fd, #fdfdff);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 10px 0;
+    z-index: 999;
+  }
+
+  .menuItems li {
+    margin: 10px 0;
+  }
+
+  .menuItems li a {
+    display: block;
+    padding: 10px 20px;
+  }
+}
+
+.profile-container {
+  max-width: 700px;
+  margin: 90px auto 50px; /* 90px top to clear fixed nav */
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  text-align: center;
+}
+
+.profile-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #1e3a8a;
+}
+
+.profile-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-picture img {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #4e73df;
+  margin-bottom: 20px;
+}
+
+.profile-details {
+  text-align: left;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.profile-details p {
+  margin: 8px 0;
+  color: #333;
+}
+
+.profile-details p strong {
+  display: inline-block;
+  width: 130px;
+  color: #4e73df;
+}
+
+.profile-actions {
+  margin-top: 20px;
+}
+
+.btn {
+  text-decoration: none;
+  padding: 10px 20px;
+  background-color: #4e73df;
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  margin: 5px;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #2e59d9;
+}
+
+.btn-logout {
+  background-color: #e74a3b;
+}
+
+.btn-logout:hover {
+  background-color: #c0392b;
+}
+
+.profile-meter {
+  margin-top: 25px;
+}
+
+.meter {
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.meter-fill {
+  height: 100%;
+  background-color: #1cc88a;
+  width: 0;
+  transition: width 0.4s ease;
+  text-align: center;
+  color: white;
+  line-height: 20px;
+  font-size: 13px;
+}
+
+.footer {
+  background: linear-gradient(to right, #e3f2fd, #fdfdff);
+  padding: 30px 20px;
+  border-top: 2px solid #ccc;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex: 1 1 250px;
+  min-width: 220px;
+}
+
+.footer-section p {
+  margin: 5px 0;
+}
+
+.quick-links a {
+  display: inline-block;
+  margin: 4px 8px;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.quick-links a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.social-links a img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

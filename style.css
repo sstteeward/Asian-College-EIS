@@ -1,0 +1,343 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #dcefff, #f3f9ff);
+}
+
+.top-nav {
+    background: linear-gradient(to right, #dcefff, #f3f9ff);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.top-nav img {
+    width: 50px;
+    height: auto;
+}
+
+.top-nav h2 {
+    margin: 0;
+    font-size: 24px;
+    color: black;
+}
+
+.top-nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.top-nav ul li {
+    margin-left: 30px;
+}
+
+.top-nav ul li a {
+    color: black;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.top-nav ul li a:hover {
+    background-color: #e11d48;
+}
+
+.menuBtn {
+    display: none;
+}
+
+/* Layout */
+.desktop-layout {
+    display: flex;
+    height: 100%;
+    padding-top: 70px;
+}
+
+.main-content {
+    margin: 0 auto;
+    padding: 40px;
+    max-width: 800px;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.main-content section {
+    margin-top: 60px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-content h1 {
+    margin-top: 0;
+    color: #1e3a8a;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-bottom: 5px;
+    color: #1e3a8a;
+    font-weight: bold;
+}
+
+form input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 15px;
+    align-items: center;
+    padding: 10px;
+    background: #f9fafb;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: normal;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 15px;
+    height: 15px;
+    border: 2px solid #1e3a8a;
+    border-radius: 50%;
+    background-color: white;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.radio-option input[type="radio"]:checked + .radio-custom {
+    background-color: #1e3a8a;
+    border-color: #1e3a8a;
+}
+
+.radio-option:hover .radio-custom {
+    border-color: #e11d48;
+}
+
+.radio-text {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px;
+}
+
+form select {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #333;
+    appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 10px 6px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+form select:focus {
+    border-color: #1e3a8a;
+    outline: none;
+}
+
+/* Submit button */
+form button {
+    padding: 12px;
+    background-color: #e11d48;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+form button:hover {
+    background-color: #c81e3c;
+}
+
+.wrapper {
+    margin-top: 10px;
+  }
+  
+  .wrapper img {
+    width: 100px;
+    height: 10px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #1e3a8a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .wrapper img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(30, 58, 138, 0.6);
+  }
+  
+  #previewImg {
+    max-width: 150px;
+    height: auto;
+    display: none;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: 2px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+    .top-nav ul {
+        display: none;
+    }
+
+    .menuBtn {
+        display: block;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+    }
+
+    .menuItems.menuOpen {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        right: 20px;
+          background: linear-gradient(to right, #e3f2fd, #fdfdff);
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 10px 0;
+        z-index: 999;
+    }
+
+    .menuItems li {
+        margin: 10px 0;
+    }
+
+    .menuItems li a {
+        display: block;
+        padding: 10px 20px;
+    }
+}
+
+.footer {
+  background: linear-gradient(to right, #e3f2fd, #fdfdff);
+  padding: 30px 20px;
+  border-top: 2px solid #ccc;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex: 1 1 250px;
+  min-width: 220px;
+}
+
+.footer-section p {
+  margin: 5px 0;
+}
+
+.quick-links a {
+  display: inline-block;
+  margin: 4px 8px;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.quick-links a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.social-links a img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

@@ -1,0 +1,253 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+background: linear-gradient(to right, #dcefff, #f3f9ff);}
+
+.top-nav {
+background: linear-gradient(to right, #dcefff, #f3f9ff);    color: white;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.top-nav img {
+    width: 50px;
+    height: auto;
+}
+
+.top-nav h2 {
+    margin: 0;
+    font-size: 24px;
+    color: black;
+}
+
+.top-nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.top-nav ul li {
+    margin-left: 30px;
+}
+
+.top-nav ul li a {
+    color: black;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.top-nav ul li a:hover {
+    background-color: #e11d48;
+}
+
+.menuBtn {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .top-nav ul {
+        display: none;
+    }
+
+    .menuBtn {
+        display: block;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+    }
+
+    .menuItems.menuOpen {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        right: 20px;
+      background: linear-gradient(to right, #dcefff, #f3f9ff);    color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 10px 0;
+        z-index: 999;
+    }
+
+    .menuItems li {
+        margin: 10px 0;
+    }
+
+    .menuItems li a {
+        display: block;
+        padding: 10px 20px;
+    }
+}
+
+.dashboard {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 1rem;
+}
+
+h1{
+    text-align: center;
+    margin-top: 5rem;
+}
+
+.dashboard h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.card h2 {
+  margin: 0.5rem 0;
+  color: #007BFF;
+}
+
+.quick-actions {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.quick-actions a {
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: #007BFF;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.quick-actions a:hover {
+  background: #0056b3;
+}
+
+.recent {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.recent-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent small {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.footer {
+  background: linear-gradient(to right, #e3f2fd, #fdfdff);
+  padding: 30px 20px;
+  border-top: 2px solid #ccc;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex: 1 1 250px;
+  min-width: 220px;
+}
+
+.footer-section p {
+  margin: 5px 0;
+}
+
+.quick-links a {
+  display: inline-block;
+  margin: 4px 8px;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.quick-links a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.social-links a img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
