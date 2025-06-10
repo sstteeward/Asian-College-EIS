@@ -4,6 +4,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
     header("Location: index.php");
     exit();
 }
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -12,21 +14,52 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="assets\logo.png" />
+  <link rel="icon" href="assets/logo.png" />
   <title>Asian College EIS Admin</title>
+  <style>
+
+    
+    .menuItems li a.active {
+      color: #e74c3c;
+      font-weight: 700;
+      border-bottom: 2px solid #e74c3c;
+      transition: all 0.3s ease;
+    }
+
+    .menuItems li a:hover:not(.active) {
+      color: #c0392b;
+    }
+
+    button[type="submit"] {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 15px;
+      display: inline-block;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #E53E3E;
+    }
+  </style>
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin Add Employee</h2>
+    <h2>Asian College EIS Admin</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo" />
     <div class="menu">
-      <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
+      <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="home.php">🏠 Home</a></li>
-        <li><a href="notifications.php">🔔 Notifications</a></li>
-        <li><a href="employee.php">👨‍💼 Employee</a></li>
-        <li><a href="addemployee.php">➕ Add New Employee</a></li>
-        <li><a href="profile.php">👤 Profile</a></li>
+        <li><a href="home.php" class="<?= $currentPage === 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="notifications.php" class="<?= $currentPage === 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="employee.php" class="<?= $currentPage === 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="addemployee.php" class="<?= $currentPage === 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+        <li><a href="profile.php" class="<?= $currentPage === 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -87,13 +120,13 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
-      menuBtn.src = menuOpen ? 'assets/closeIcon.png' : 'assets/menuIcon.png';
+      menuBtn.src = menuOpen ? 'assets/black_closeIcon.png' : 'assets/black_menuIcon.png';
       menuItems.classList.toggle('menuOpen');
     });
 
     menuItems.addEventListener('click', () => {
       menuOpen = false;
-      menuBtn.src = 'assets/menuIcon.png';
+      menuBtn.src = 'assets/black_menuIcon.png';
       menuItems.classList.remove('menuOpen');
     });
 
@@ -104,35 +137,34 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
     }
   </script>
 
-<footer class="footer">
-  <div class="footer-content">
-    <div class="footer-section">
-      <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
-    </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <p>&copy; <?= date("Y") ?> <strong>Asian College</strong>. All rights reserved.</p>
+      </div>
 
-    <div class="footer-section quick-links">
-      <a href="profile.php">👤 Profile</a>
-      <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
-      <a href="#" onclick="confirmLogout()">🚪 Logout</a>
-    </div>
+      <div class="footer-section quick-links">
+        <a href="profile.php">👤 Profile</a>
+        <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
+        <a href="#" onclick="confirmLogout()">🚪 Logout</a>
+      </div>
 
-    <div class="footer-section social-links">
-      <a href="https://www.instagram.com/asiancollegedgte/" target="_blank" rel="noopener" aria-label="Instagram">
-        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#E4405F">
-          <path d="M7.75 2A5.75 5.75 0 002 7.75v8.5A5.75 5.75 0 007.75 22h8.5A5.75 5.75 0 0022 16.25v-8.5A5.75 5.75 0 0016.25 2h-8.5zm0 1.5h8.5a4.25 4.25 0 014.25 4.25v8.5a4.25 4.25 0 01-4.25 4.25h-8.5a4.25 4.25 0 01-4.25-4.25v-8.5a4.25 4.25 0 014.25-4.25zm4.25 3.75a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 1.5a3 3 0 110 6 3 3 0 010-6zm4.75-.375a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/>
-        </svg>
-      </a>
-      <a href="https://www.facebook.com/AsianCollegeDumaguete" target="_blank" rel="noopener" aria-label="Facebook">
-        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" fill="#1877F2" viewBox="0 0 24 24">
-          <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.406.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.466.099 2.796.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.588l-.467 3.622h-3.121V24h6.116c.73 0 1.324-.593 1.324-1.324V1.325c0-.732-.593-1.325-1.324-1.325z"/>
-        </svg>
-      </a>
-      <a href="https://asiancollege.edu.ph" target="_blank" aria-label="Website">
-        <img src="assets/cropped-favicon-512-192x192.png" alt="Website">
-      </a>
+      <div class="footer-section social-links">
+        <a href="https://www.instagram.com/asiancollegedgte/" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#E4405F">
+            <path d="M7.75 2A5.75 5.75 0 002 7.75v8.5A5.75 5.75 0 007.75 22h8.5A5.75 5.75 0 0022 16.25v-8.5A5.75 5.75 0 0016.25 2h-8.5zm0 1.5h8.5a4.25 4.25 0 014.25 4.25v8.5a4.25 4.25 0 01-4.25 4.25h-8.5a4.25 4.25 0 01-4.25-4.25v-8.5a4.25 4.25 0 014.25-4.25zm4.25 3.75a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 1.5a3 3 0 110 6 3 3 0 010-6zm4.75-.375a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/>
+          </svg>
+        </a>
+        <a href="https://www.facebook.com/AsianCollegeDumaguete" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" fill="#1877F2" viewBox="0 0 24 24">
+            <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.406.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.466.099 2.796.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.588l-.467 3.622h-3.121V24h6.116c.73 0 1.324-.593 1.324-1.324V1.325c0-.732-.593-1.325-1.324-1.325z"/>
+          </svg>
+        </a>
+        <a href="https://asiancollege.edu.ph" target="_blank" aria-label="Website">
+          <img src="assets/cropped-favicon-512-192x192.png" alt="Website">
+        </a>
+      </div>
     </div>
-  </div>
-</footer>
-
+  </footer>
 </body>
 </html>

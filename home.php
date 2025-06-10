@@ -44,7 +44,7 @@ $recentResult = mysqli_query($conn, $recentQuery);
     <h2>Asian College EIS Admin Home</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
-      <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
+      <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
         <li><a href="home.php">🏠 Home</a></li>
         <li><a href="notifications.php">🔔 Notifications</a></li>
@@ -95,17 +95,17 @@ $recentResult = mysqli_query($conn, $recentQuery);
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
       if (menuOpen) {
-        menuBtn.src = 'assets/closeIcon.png'; 
+        menuBtn.src = 'assets/black_closeIcon.png'; 
         menuItems.classList.add('menuOpen');
       } else {
-        menuBtn.src = 'assets/menuIcon.png'; 
+        menuBtn.src = 'assets/black_menuIcon.png'; 
         menuItems.classList.remove('menuOpen');
       }
     });
 
     menuItems.addEventListener('click', () => {
       menuOpen = false;
-      menuBtn.src = 'assets/menuIcon.png';
+      menuBtn.src = 'assets/black_menuIcon.png';
       menuItems.classList.remove('menuOpen');
     });
 

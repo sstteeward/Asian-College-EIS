@@ -52,11 +52,27 @@ html {
   text-decoration: none;
   padding: 10px 15px;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.top-nav ul li a::after {
+  content: '';
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background: red;
+  left: 0;
+  bottom: 0;
+  transition: width 0.3s ease;
 }
 
 .top-nav ul li a:hover {
-  background-color: #e11d48;
+  color: red;
+}
+
+.top-nav ul li a:hover::after {
+  width: 100%;
 }
 
 .menuBtn {
@@ -100,7 +116,7 @@ html {
 
 .profile-container {
   max-width: 700px;
-  margin: 90px auto 50px; /* 90px top to clear fixed nav */
+  margin: 90px auto 50px; 
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -154,7 +170,8 @@ html {
   margin-top: 20px;
 }
 
-.btn {
+/* BUTTONS */
+.btn, .btn-logout {
   text-decoration: none;
   padding: 10px 20px;
   background-color: #4e73df;
@@ -162,22 +179,25 @@ html {
   border-radius: 10px;
   font-weight: bold;
   margin: 5px;
-  transition: background 0.3s;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s ease;
 }
 
 .btn:hover {
   background-color: #2e59d9;
+  transform: scale(1.05);
 }
 
 .btn-logout {
-  background-color: #e74a3b;
+  background-color: red;
 }
 
 .btn-logout:hover {
   background-color: #c0392b;
+  transform: scale(1.05);
 }
 
+/* METER */
 .profile-meter {
   margin-top: 25px;
 }
@@ -194,13 +214,18 @@ html {
   height: 100%;
   background-color: #1cc88a;
   width: 0;
-  transition: width 0.4s ease;
+  transition: width 0.6s ease-in-out, background-color 0.3s;
   text-align: center;
   color: white;
   line-height: 20px;
   font-size: 13px;
 }
 
+.meter:hover .meter-fill {
+  background-color: #58d68d;
+}
+
+/* FOOTER */
 .footer {
   background: linear-gradient(to right, #e3f2fd, #fdfdff);
   padding: 30px 20px;
