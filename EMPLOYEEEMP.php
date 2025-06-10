@@ -20,6 +20,9 @@ function generateLetterAvatar($letter) {
         user-select: none;
     '>" . strtoupper($letter) . "</div>";
 }
+
+$currentPage = basename($_SERVER['PHP_SELF']);
+
 ?>
 
 <!DOCTYPE html>
@@ -29,19 +32,18 @@ function generateLetterAvatar($letter) {
   <link rel="stylesheet" href="employee.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="assets\logo.png" />
-  <title>Asian College EIS Admin - Employee List</title>
+  <title>Asian College EIS</title>
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin Employee</h2>
-    <img src="assets/logo2-removebg-preview.png" alt="Logo" />
+    <h2>Asian College EIS</h2>
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="HOMEEMP.php">🏠 Home</a></li>
-        <li><a href="NOTIFEMP.php">🔔 Notifications</a></li>
-        <li><a href="EMPLOYEEEMP.php">🧑‍💼 Employee</a></li>
-        <li><a href="VIEWPROFEMP.php">👤 Profile</a></li>
+        <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -147,6 +149,18 @@ function generateLetterAvatar($letter) {
     </section>
   </div>
 
+    <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
@@ -169,10 +183,16 @@ function generateLetterAvatar($letter) {
       menuItems.classList.remove('menuOpen');
     });
 
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
+     function confirmLogout() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
     }
   </script>
 

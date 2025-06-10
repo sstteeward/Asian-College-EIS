@@ -49,7 +49,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body>
   <nav class="top-nav">
     <h2>Asian College EIS Admin</h2>
-    <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">

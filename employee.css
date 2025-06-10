@@ -234,7 +234,7 @@ tr:hover td {
 }
 
 .edit-btn:hover {
-  background-color: #059669;
+  background-color: red;
 }
 
 .delete-btn {

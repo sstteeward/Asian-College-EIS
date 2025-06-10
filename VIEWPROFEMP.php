@@ -47,6 +47,8 @@ $filename = !empty($user['picture']) ? $user['picture'] : 'default.png';
 $profilePic = 'uploads/' . basename($filename);
 
 $fullName = trim($user['firstName'] . ' ' . ($user['middleName'] ? $user['middleName'] . ' ' : '') . $user['lastName']);
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -56,19 +58,18 @@ $fullName = trim($user['firstName'] . ' ' . ($user['middleName'] ? $user['middle
   <link rel="stylesheet" href="VIEWPROFEMP.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="assets\logo.png" />
-  <title>Asian College EIS Admin</title>
+  <title>Asian College EIS</title>
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin Profile</h2>
-    <img src="assets/logo2-removebg-preview.png" alt="Logo" />
+    <h2>Asian College EIS</h2>
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" role="button" aria-label="Toggle navigation menu" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="HOMEEMP.php">🏠 Home</a></li>
-        <li><a href="NOTIFEMP.php">🔔 Notifications</a></li>
-        <li><a href="EMPLOYEEEMP.php">🧑‍💼 Employee</a></li>
-        <li><a href="VIEWPROFEMP.php">👤 Profile</a></li>
+        <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
 </nav>
@@ -104,6 +105,18 @@ $fullName = trim($user['firstName'] . ' ' . ($user['middleName'] ? $user['middle
     </div>
   </div>
 
+    <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
@@ -130,6 +143,18 @@ $fullName = trim($user['firstName'] . ' ' . ($user['middleName'] ? $user['middle
         meterFill.style.width = width;
       }, 50);
     });
+
+     function confirmLogout() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
+    }
   </script>
 
 <footer class="footer">
