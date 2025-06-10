@@ -114,6 +114,12 @@ html {
   }
 }
 
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 .profile-container {
   max-width: 700px;
   margin: 90px auto 50px; 

@@ -6,6 +6,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
+
 ?>
 
 <!DOCTYPE html>
@@ -17,8 +18,67 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <link rel="icon" href="assets/logo.png" />
   <title>Asian College EIS Admin</title>
   <style>
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
 
-    
+    .modal-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+    }
+
+    .btn-confirm {
+      background-color: red;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-confirm:hover {
+      background-color: darkred;
+    }
+
+    .btn-cancel {
+      background-color: #bdc3c7;
+      color: #333;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #95a5a6;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     .menuItems li a.active {
       color: #e74c3c;
       font-weight: 700;
@@ -113,6 +173,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </section>
   </div>
 
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
@@ -130,10 +202,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       menuItems.classList.remove('menuOpen');
     });
 
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
+     function confirmLogout() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
     }
   </script>
 

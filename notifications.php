@@ -33,6 +33,8 @@ $result = mysqli_query($conn, $sql);
 function activeClass($filterName, $currentFilter) {
     return $filterName === $currentFilter ? 'active' : '';
 }
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -46,16 +48,16 @@ function activeClass($filterName, $currentFilter) {
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin Notifications</h2>
+    <h2>Asian College EIS Admin</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="home.php">🏠 Home</a></li>
-        <li><a href="notifications.php">🔔 Notifications</a></li>
-        <li><a href="employee.php">👨‍💼 Employee</a></li>
-        <li><a href="addemployee.php">➕ Add New Employee</a></li>
-        <li><a href="profile.php">👤 Profile</a></li>
+        <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+        <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -90,6 +92,18 @@ function activeClass($filterName, $currentFilter) {
     </div>
   </div>
 
+    <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
@@ -113,10 +127,16 @@ function activeClass($filterName, $currentFilter) {
       menuItems.classList.remove('menuOpen');
     });
 
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
+   function confirmLogout() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
     }
   </script>
 

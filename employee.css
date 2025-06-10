@@ -9,10 +9,8 @@ html {
   height: 100%;
   font-family: Arial, sans-serif;
   background: linear-gradient(to right, #dcefff, #f3f9ff);
-
 }
 
-/* Top Navigation */
 .top-nav {
   background: linear-gradient(to right, #dcefff, #f3f9ff);
   color: white;
@@ -26,7 +24,6 @@ html {
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 
 .top-nav img {
   width: 50px;
@@ -55,11 +52,27 @@ html {
   text-decoration: none;
   padding: 10px 15px;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.top-nav ul li a::after {
+  content: '';
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background: red;
+  left: 0;
+  bottom: 0;
+  transition: width 0.3s ease;
 }
 
 .top-nav ul li a:hover {
-  background-color: #e11d48;
+  color: red;
+}
+
+.top-nav ul li a:hover::after {
+  width: 100%;
 }
 
 .menuBtn {
@@ -84,12 +97,11 @@ html {
     position: absolute;
     top: 70px;
     right: 20px;
+    background: linear-gradient(to right, #e3f2fd, #fdfdff);
     border-radius: 8px;
     overflow: hidden;
     padding: 10px 0;
     z-index: 999;
-    background: linear-gradient(to right, #e3f2fd, #fdfdff);
-
   }
 
   .menuItems li {
@@ -100,6 +112,12 @@ html {
     display: block;
     padding: 10px 20px;
   }
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 /* Employee Section */
@@ -327,3 +345,75 @@ h2 {
   height: 20px;
   object-fit: contain;
 }
+
+.modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+    }
+
+    .btn-confirm {
+      background-color: red;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-confirm:hover {
+      background-color: darkred;
+    }
+
+    .btn-cancel {
+      background-color: #bdc3c7;
+      color: #333;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #95a5a6;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+      .menuItems li a.active {
+      color: #e74c3c;
+      font-weight: 700;
+      border-bottom: 2px solid #e74c3c;
+      transition: all 0.3s ease;
+    }
+
+    .menuItems li a:hover:not(.active) {
+      color: #c0392b;
+    }

@@ -32,18 +32,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <link rel="icon" href="assets\logo.png" />
   <title>Asian College EIS Admin</title>
 
-  <style>
-    .menuItems a.active {
-      color: #E53E3E; 
-      border-bottom: 3px solid #E53E3E;
-      transition: all 0.3s ease;
-    }
-   
-  </style>
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin Employee</h2>
+    <h2>Asian College EIS Admin</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo" />
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
@@ -180,6 +172,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </section>
   </div>
 
+    <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
@@ -203,9 +207,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     });
 
     function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
     }
   </script>
 
@@ -232,10 +242,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-3h2v-2c0-2 1-3 3-3h2v3h-2c-.5 0-1 .5-1 1v1h3l-.5 3h-2.5v7A10 10 0 0022 12z"/>
           </svg>
         </a>
-        <a href="https://twitter.com/asiancollegedgte" target="_blank" rel="noopener" aria-label="Twitter">
-          <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2">
-            <path d="M22.46 6c-.77.35-1.6.59-2.46.69a4.32 4.32 0 001.88-2.38 8.59 8.59 0 01-2.73 1.04 4.3 4.3 0 00-7.33 3.92 12.2 12.2 0 01-8.85-4.5 4.3 4.3 0 001.33 5.74 4.25 4.25 0 01-1.95-.54v.05a4.3 4.3 0 003.45 4.22 4.3 4.3 0 01-1.94.07 4.3 4.3 0 004.01 3 8.6 8.6 0 01-5.32 1.83A8.76 8.76 0 012 19.54 12.14 12.14 0 008.29 21c7.55 0 11.68-6.26 11.68-11.69 0-.18-.01-.35-.02-.53A8.35 8.35 0 0022.46 6z"/>
-          </svg>
+        <a href="https://asiancollege.edu.ph" target="_blank" aria-label="Website">
+          <img src="assets/cropped-favicon-512-192x192.png" alt="Website">
         </a>
       </div>
     </div>
