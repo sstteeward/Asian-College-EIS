@@ -14,7 +14,7 @@ if (isset($_POST['update'])) {
   $middleName = ucfirst($_POST['middlename']);
   $lastName = ucfirst($_POST['lastname']);
   $email = $_POST['email'];
-  $position = ucfirst($_POST['position']);
+  $department = ucfirst($_POST['department']);
   $sex = $_POST['sex'];
 
   $imagePath = $row['picture'];  
@@ -37,7 +37,7 @@ if (isset($_POST['update'])) {
     middleName = '$middleName', 
     lastName = '$lastName', 
     email = '$email', 
-    position = '$position', 
+    department = '$department', 
     sex = '$sex', 
     picture = '$imagePath' 
     WHERE employeeID = '$employeeID'";
@@ -96,8 +96,15 @@ if (isset($_POST['update'])) {
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" value="<?= htmlspecialchars($row['email']) ?>" required>
       
-      <label for="position">Position:</label>
-      <input type="text" id="position" name="position" value="<?= htmlspecialchars($row['position']) ?>" required>
+      <label for="department">Department:</label>
+        <select id="department" name="department" required>
+          <option value="">-- Select Department --</option>
+          <option value="TVET">TVET</option>
+          <option value="CCSE">CCSE</option>
+          <option value="CBAA">CBAA</option>
+          <option value="CTHM">CTHM</option>
+          <option value="SHS">SHS</option>
+       </select>
       
       <label for="sex">Sex:</label>
       <div class="radio-group">
@@ -113,7 +120,7 @@ if (isset($_POST['update'])) {
           <span class="radio-text">Female</span>
         </label>
       </div>
-      
+    
       <button type="submit" name="update">Update Admin</button>
     </form>
   </section>

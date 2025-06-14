@@ -62,7 +62,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <th>Middle Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Position</th>
+            <th>Department</th>
           </tr>
         </thead>
         <tbody>
@@ -87,7 +87,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['position']) . "</td>";
+                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
               }
           } else {
               echo "<tr><td colspan='9' style='text-align:center;'>No Admins found.</td></tr>";
@@ -110,7 +110,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <th>Middle Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Position</th>
+            <th>Department</th>
             
           </tr>
         </thead>
@@ -137,7 +137,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['position']) . "</td>";
+                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
               }
           } else {
               echo "<tr><td colspan='9' style='text-align:center;'>No Employees found.</td></tr>";

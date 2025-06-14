@@ -96,8 +96,15 @@ if (isset($_POST['update'])) {
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" value="<?= htmlspecialchars($row['email']) ?>" required>
       
-      <label for="position">Position:</label>
-      <input type="text" id="position" name="position" value="<?= htmlspecialchars($row['position']) ?>" required>
+      <label for="department">Department:</label>
+        <select id="department" name="department" required>
+          <option value="">-- Select Department --</option>
+          <option value="TVET">TVET</option>
+          <option value="CCSE">CCSE</option>
+          <option value="CBAA">CBAA</option>
+          <option value="CTHM">CTHM</option>
+          <option value="SHS">SHS</option>
+        </select>
       
       <label for="sex">Sex:</label>
       <div class="radio-group">

@@ -13,16 +13,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $middleName = trim($_POST['middleName'] ?? '');
     $lastName = trim($_POST['lastName'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $position = trim($_POST['position'] ?? '');
+    $department = trim($_POST['department'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $sex = trim($_POST['sex'] ?? '');
 
-    if (empty($id) || empty($firstName) || empty($lastName) || empty($email) || empty($position) || empty($role) || empty($sex)) {
-        alertAndRedirect('Please fill all required fields.');
+    // Validate required fields
+    if (
+        empty($id) || empty($firstName) || empty($lastName) || empty($email) ||
+        empty($department) || empty($role) || empty($sex)
+    ) {
+        header("Location: addemployee.php?error=missing");
+        exit();
     }
 
+    // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        alertAndRedirect('Invalid email address.');
+        header("Location: addemployee.php?error=invalid_email");
+        exit();
     }
 
     // Format names: capitalize and remove extra spaces
@@ -32,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
     $table = strtolower($role) === 'admin' ? 'admin_' : 'employeeuser';
 
-    // Check for existing ID or Email
+    // Check if ID or email already exists
     $checkSql = "SELECT 1 FROM $table WHERE employeeID = ? OR email = ? LIMIT 1";
     $stmtCheck = $conn->prepare($checkSql);
     $stmtCheck->bind_param("ss", $id, $email);
@@ -40,11 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $stmtCheck->store_result();
 
     if ($stmtCheck->num_rows > 0) {
-        alertAndRedirect("Employee ID or Email already exists in $role table.");
+        $stmtCheck->close();
+        header("Location: addemployee.php?duplicate=1");
+        exit();
     }
     $stmtCheck->close();
 
-    // Get admin who added the record
+    // Get admin ID who is adding the user
     $adminEmail = $_SESSION['email'];
     $stmtAdmin = $conn->prepare("SELECT employeeID FROM admin_ WHERE email = ? LIMIT 1");
     $stmtAdmin->bind_param("s", $adminEmail);
@@ -54,27 +63,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $stmtAdmin->close();
 
     if (!$addedBy) {
-        alertAndRedirect("Could not determine admin who is adding this user.");
+        header("Location: addemployee.php?error=admin_not_found");
+        exit();
     }
 
     // Insert new record
-    $insertSql = "INSERT INTO $table (employeeID, firstName, middleName, lastName, email, position, sex, registryDate, addedBy) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+    $insertSql = "INSERT INTO $table 
+        (employeeID, firstName, middleName, lastName, email, department, sex, registryDate, addedBy) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+
     $stmtInsert = $conn->prepare($insertSql);
-    $stmtInsert->bind_param("sssssssi", $id, $firstName, $middleName, $lastName, $email, $position, $sex, $addedBy);
+    $stmtInsert->bind_param("sssssssi", $id, $firstName, $middleName, $lastName, $email, $department, $sex, $addedBy);
 
     if ($stmtInsert->execute()) {
         header("Location: addemployee.php?success=1");
-        exit(); // ✅ Ensure proper redirect
+        exit();
     } else {
-        alertAndRedirect("Error adding new $role: " . $stmtInsert->error);
+        header("Location: addemployee.php?error=insert_failed");
+        exit();
     }
 } else {
     header("Location: addemployee.php");
-    exit();
-}
-
-function alertAndRedirect($message) {
-    $msg = htmlspecialchars($message, ENT_QUOTES);
-    echo "<script>alert('$msg'); window.history.back();</script>";
     exit();
 }

@@ -141,8 +141,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
 
-        <label for="position">Position:</label>
-        <input type="text" id="position" name="position" required />
+        <label for="department">Department:</label>
+        <select id="department" name="department" required>
+          <option value="">-- Select Department --</option>
+          <option value="TVET">TVET</option>
+          <option value="CCSE">CCSE</option>
+          <option value="CBAA">CBAA</option>
+          <option value="CTHM">CTHM</option>
+          <option value="SHS">SHS</option>
+        </select>
 
         <label for="role">Role:</label>
         <select id="role" name="role" required>
@@ -178,6 +185,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <p>The new employee has been successfully added.</p>
       <div class="modal-buttons">
         <button onclick="closeAddSuccessModal()" class="btn-confirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Duplicate Error Modal -->
+  <div id="duplicateErrorModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>⚠️ Duplicate Entry</h3>
+      <p>Employee ID or Email already exists.</p>
+      <div class="modal-buttons">
+        <button onclick="closeDuplicateModal()" class="btn-confirm">OK</button>
       </div>
     </div>
   </div>
@@ -223,18 +241,25 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       window.location.href = "logout.php";
     }
 
-    // ✅ Show Success Modal if ?success=1 in URL
+    // ✅ Show Modals Based on URL Parameters
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('success') === '1') {
         document.getElementById('addSuccessModal').style.display = 'flex';
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
+      } else if (urlParams.get('duplicate') === '1') {
+        document.getElementById('duplicateErrorModal').style.display = 'flex';
       }
+
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
     });
 
     function closeAddSuccessModal() {
       document.getElementById('addSuccessModal').style.display = 'none';
+    }
+
+    function closeDuplicateModal() {
+      document.getElementById('duplicateErrorModal').style.display = 'none';
     }
   </script>
 
@@ -243,26 +268,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <div class="footer-section">
         <p>&copy; <?= date("Y") ?> <strong>Asian College</strong>. All rights reserved.</p>
       </div>
-
       <div class="footer-section quick-links">
         <a href="profile.php">👤 Profile</a>
         <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
         <a href="#" onclick="confirmLogout()">🚪 Logout</a>
       </div>
-
       <div class="footer-section social-links">
-        <a href="https://www.instagram.com/asiancollegedgte/" target="_blank" rel="noopener" aria-label="Instagram">
-          <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#E4405F">
+        <a href="https://www.instagram.com/asiancollegedgte/" target="_blank" aria-label="Instagram">
+          <svg class="social-icon" fill="#E4405F" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M7.75 2A5.75 5.75 0 002 7.75v8.5A5.75 5.75 0 007.75 22h8.5A5.75 5.75 0 0022 16.25v-8.5A5.75 5.75 0 0016.25 2h-8.5zm0 1.5h8.5a4.25 4.25 0 014.25 4.25v8.5a4.25 4.25 0 01-4.25 4.25h-8.5a4.25 4.25 0 01-4.25-4.25v-8.5a4.25 4.25 0 014.25-4.25zm4.25 3.75a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 1.5a3 3 0 110 6 3 3 0 010-6zm4.75-.375a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/>
           </svg>
         </a>
-        <a href="https://www.facebook.com/AsianCollegeDumaguete" target="_blank" rel="noopener" aria-label="Facebook">
-          <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" fill="#1877F2" viewBox="0 0 24 24">
+        <a href="https://www.facebook.com/AsianCollegeDumaguete" target="_blank" aria-label="Facebook">
+          <svg class="social-icon" fill="#1877F2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.406.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.466.099 2.796.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.588l-.467 3.622h-3.121V24h6.116c.73 0 1.324-.593 1.324-1.324V1.325c0-.732-.593-1.325-1.324-1.325z"/>
           </svg>
         </a>
         <a href="https://asiancollege.edu.ph" target="_blank" aria-label="Website">
-          <img src="assets/cropped-favicon-512-192x192.png" alt="Website">
+          <img src="assets/cropped-favicon-512-192x192.png" alt="Website" />
         </a>
       </div>
     </div>

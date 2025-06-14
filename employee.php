@@ -62,7 +62,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <th>Middle Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Position</th>
+            <th>Department</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -90,7 +90,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['position']) . "</td>";
+                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
                   echo "<td>
                           <a href='editADMIN.php?id=" . urlencode($row['employeeID']) . "'>
                             <button class='action-btn edit-btn'>Edit</button>
@@ -122,7 +122,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <th>Middle Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Position</th>
+            <th>Department</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -150,7 +150,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
                   echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['position']) . "</td>";
+                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
                   echo "<td>
                           <a href='edit_employee.php?id=" . urlencode($row['employeeID']) . "'>
                             <button class='action-btn edit-btn'>Edit</button>
