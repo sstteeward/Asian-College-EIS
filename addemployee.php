@@ -6,7 +6,6 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
-
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +43,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     .modal-buttons {
       margin-top: 1.5rem;
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       gap: 1rem;
     }
 
@@ -172,7 +171,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </section>
   </div>
 
-  <!-- Logout Confirmation Modal -->
+  <!-- ✅ Success Modal -->
+  <div id="addSuccessModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>🎉 Employee Added</h3>
+      <p>The new employee has been successfully added.</p>
+      <div class="modal-buttons">
+        <button onclick="closeAddSuccessModal()" class="btn-confirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ❌ Logout Modal -->
   <div id="logoutModal" class="modal-overlay">
     <div class="modal-box">
       <h3>Confirm Logout</h3>
@@ -201,7 +211,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       menuItems.classList.remove('menuOpen');
     });
 
-     function confirmLogout() {
+    function confirmLogout() {
       document.getElementById('logoutModal').style.display = 'flex';
     }
 
@@ -211,6 +221,20 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     function proceedLogout() {
       window.location.href = "logout.php";
+    }
+
+    // ✅ Show Success Modal if ?success=1 in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === '1') {
+        document.getElementById('addSuccessModal').style.display = 'flex';
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    });
+
+    function closeAddSuccessModal() {
+      document.getElementById('addSuccessModal').style.display = 'none';
     }
   </script>
 

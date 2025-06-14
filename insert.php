@@ -3,7 +3,7 @@ session_start();
 include 'db.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -25,12 +25,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         alertAndRedirect('Invalid email address.');
     }
 
+    // Format names: capitalize and remove extra spaces
     $firstName = ucwords(strtolower(preg_replace('/\s+/', ' ', $firstName)));
     $middleName = ucwords(strtolower(preg_replace('/\s+/', ' ', $middleName)));
     $lastName = ucwords(strtolower(preg_replace('/\s+/', ' ', $lastName)));
 
     $table = strtolower($role) === 'admin' ? 'admin_' : 'employeeuser';
 
+    // Check for existing ID or Email
     $checkSql = "SELECT 1 FROM $table WHERE employeeID = ? OR email = ? LIMIT 1";
     $stmtCheck = $conn->prepare($checkSql);
     $stmtCheck->bind_param("ss", $id, $email);
@@ -42,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     }
     $stmtCheck->close();
 
+    // Get admin who added the record
     $adminEmail = $_SESSION['email'];
     $stmtAdmin = $conn->prepare("SELECT employeeID FROM admin_ WHERE email = ? LIMIT 1");
     $stmtAdmin->bind_param("s", $adminEmail);
@@ -54,16 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         alertAndRedirect("Could not determine admin who is adding this user.");
     }
 
+    // Insert new record
     $insertSql = "INSERT INTO $table (employeeID, firstName, middleName, lastName, email, position, sex, registryDate, addedBy) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
     $stmtInsert = $conn->prepare($insertSql);
     $stmtInsert->bind_param("sssssssi", $id, $firstName, $middleName, $lastName, $email, $position, $sex, $addedBy);
 
     if ($stmtInsert->execute()) {
-        echo "<script>alert('New $role added successfully!'); window.location.href='addemployee.php';</script>";
+        header("Location: addemployee.php?success=1");
+        exit(); // ✅ Ensure proper redirect
     } else {
         alertAndRedirect("Error adding new $role: " . $stmtInsert->error);
     }
-    $stmtInsert->close();
 } else {
     header("Location: addemployee.php");
     exit();

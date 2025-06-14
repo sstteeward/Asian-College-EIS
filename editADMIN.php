@@ -57,7 +57,7 @@ if (isset($_POST['update'])) {
   <meta charset="UTF-8">
   <link rel="stylesheet" href="editADMIN.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/LOGO for title.png">
+  <link rel="icon" href="assets\logo.png">
   <title>Edit | Asian College EIS Admin</title>
 </head>
 <body>
