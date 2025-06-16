@@ -144,7 +144,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label for="department">Department:</label>
         <select id="department" name="department" required>
           <option value="">-- Select Department --</option>
-          <option value="TVET">TVET</option>
+          <option value="DPD">DPD</option>
           <option value="CCSE">CCSE</option>
           <option value="CBAA">CBAA</option>
           <option value="CTHM">CTHM</option>

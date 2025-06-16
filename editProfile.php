@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
     $lastName = trim($_POST['lastName']);
-    $position = trim($_POST['position']);
+    $department = trim($_POST['department']);
     $status = trim($_POST['status']);
     $contactNumber = trim($_POST['contactNumber']);
     $address = trim($_POST['address']);
@@ -44,15 +44,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileName = $user['picture']; 
     }
 
-    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, position=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
+    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $position, $status, $contactNumber, $address, $fileName, $email);
+    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
     $stmt->execute();
     $stmt->close();
 
     header("Location: profile.php");
     exit();
+
+    
 }
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 
@@ -72,11 +75,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="home.php">🏠 Home</a></li>
-        <li><a href="notifications.php">🔔 Notifications</a></li>
-        <li><a href="employee.php">🧑‍💼 Employee</a></li>
-        <li><a href="addemployee.php">➕ Add New User</a></li>
-        <li><a href="#" onclick="confirmLogout()">🚪 Logout</a></li>
+        <li><a href="home.php" class="<?= $currentPage === 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="notifications.php" class="<?= $currentPage === 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="employee.php" class="<?= $currentPage === 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="addemployee.php" class="<?= $currentPage === 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+        <li><a href="profile.php" class="<?= $currentPage === 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -99,8 +102,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Last Name:</label>
         <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
 
-        <label>Position:</label>
-        <input type="text" name="position" value="<?php echo htmlspecialchars($user['position']); ?>">
+        <label for="department">Department:</label>
+        <select id="department" name="department" required>
+          <option value="">-- Select Department --</option>
+          <option value="DPD">DPD</option>
+          <option value="CCSE">CCSE</option>
+          <option value="CBAA">CBAA</option>
+          <option value="CTHM">CTHM</option>
+          <option value="SHS">SHS</option>
+        </select>
 
         <label>Status:</label>
         <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">

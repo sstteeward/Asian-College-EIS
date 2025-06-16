@@ -26,8 +26,8 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-$fields = ['firstName', 'middleName', 'lastName', 'email', 'employeeID', 'role', 'position', 'registryDate', 'status', 'contactNumber', 'address', 'picture'];
-$completed = 0;
+$fields = ['firstName', 'middleName', 'lastName', 'email', 'employeeID', 'role', 'department',  'status', 'contactNumber', 'address', 'picture'];
+$completed = 1;
 
 foreach ($fields as $field) {
     $user[$field] = isset($user[$field]) ? trim($user[$field]) : '';
@@ -161,7 +161,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
           <p><strong>Employee ID:</strong> <?php echo htmlspecialchars($user['employeeID']); ?></p>
           <p><strong>Role:</strong> <?php echo ucfirst(htmlspecialchars($role)); ?></p>
-          <p><strong>Position:</strong> <?php echo htmlspecialchars($user['position']); ?></p>
+          <p><strong>Department:</strong> <?php echo htmlspecialchars($user['department']); ?></p>
           <p><strong>Status:</strong> <?php echo htmlspecialchars($user['status']); ?></p>
           <p><strong>Date Joined:</strong> <?php echo htmlspecialchars(date("F d, Y", strtotime($user['registryDate']))); ?></p>
           <p><strong>Contact Number:</strong> <?php echo htmlspecialchars($user['contactNumber']); ?></p>

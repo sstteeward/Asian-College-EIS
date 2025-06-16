@@ -89,6 +89,7 @@ p {
 }
 
 .btn:hover {
+  font-weight: bold;
   background: #FF0000;
   transform: scale(1.05);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);

@@ -1,168 +1,166 @@
 <?php
+session_start();
 include 'db.php';
 
-if (isset($_GET['id'])) {
-  $employeeID = $_GET['id'];
-  $query = "SELECT * FROM admin_ WHERE employeeID = '$employeeID'";
-  $result = mysqli_query($conn, $query);
-  $row = mysqli_fetch_assoc($result);
+// For debugging (optional)
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// Redirect if not logged in
+if (!isset($_SESSION['email']) || !isset($_SESSION['role'])) {
+    header("Location: index.php");
+    exit();
 }
 
-if (isset($_POST['update'])) {
-  $newEmployeeID = $_POST['employeeID'];
-  $firstName = ucfirst($_POST['firstname']);
-  $middleName = ucfirst($_POST['middlename']);
-  $lastName = ucfirst($_POST['lastname']);
-  $email = $_POST['email'];
-  $department = ucfirst($_POST['department']);
-  $sex = $_POST['sex'];
+$email = $_SESSION['email'];
+$role = $_SESSION['role'];
+$table = $role === 'employee' ? 'employeeuser' : 'admin_'; // FIXED LOGIC
 
-  $imagePath = $row['picture'];  
-  if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) { 
-    $imgName = basename($_FILES['picture']['name']);
-    $tmpName = $_FILES['picture']['tmp_name'];
-    $uploadDir = "uploads/";
-    $imagePath = $uploadDir . time() . "_" . $imgName;
+// Fetch user data
+$query = "SELECT * FROM $table WHERE email = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$stmt->close();
 
-    if (!is_dir($uploadDir)) {
-      mkdir($uploadDir, 0777, true);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $firstName = trim($_POST['firstName']);
+    $middleName = trim($_POST['middleName']);
+    $lastName = trim($_POST['lastName']);
+    $department = trim($_POST['department']);
+    $status = trim($_POST['status']);
+    $contactNumber = trim($_POST['contactNumber']);
+    $address = trim($_POST['address']);
+
+    if (!empty($_FILES["picture"]["name"])) {
+        $targetDir = "uploads/";
+        $fileName = basename($_FILES["picture"]["name"]);
+        $targetFilePath = $targetDir . $fileName;
+        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+
+        $allowedTypes = array('jpg', 'jpeg', 'png', 'gif');
+        if (in_array(strtolower($fileType), $allowedTypes)) {
+            if (!move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath)) {
+                echo "Error uploading file.";
+                exit();
+            }
+        } else {
+            $fileName = $user['picture']; // Invalid type; keep old
+        }
+    } else {
+        $fileName = $user['picture']; // No file uploaded; keep old
     }
 
-    move_uploaded_file($tmpName, $imagePath);
-  }
+    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
 
-  $updateQuery = "UPDATE admin_ SET 
-    employeeID = '$newEmployeeID',
-    firstName = '$firstName', 
-    middleName = '$middleName', 
-    lastName = '$lastName', 
-    email = '$email', 
-    department = '$department', 
-    sex = '$sex', 
-    picture = '$imagePath' 
-    WHERE employeeID = '$employeeID'";
-    
-  if (mysqli_query($conn, $updateQuery)) {
-    header("Location: employee.php");
-    exit();
-  } else {
-    echo "Error updating record: " . mysqli_error($conn);
-  }
+    if ($stmt->execute()) {
+        $stmt->close();
+        header("Location: VIEWPROFEMP.php");
+        exit();
+    } else {
+        echo "Error updating profile: " . $stmt->error;
+    }
 }
+
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="editADMIN.css">
+  <link rel="stylesheet" href="editProfile.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets\logo.png">
-  <title>Edit | Asian College EIS Admin</title>
+  <link rel="icon" href="assets/LOGO for title.png">
+  <title>Asian College EIS</title>
 </head>
 <body>
-<nav class="top-nav">
-  <h2>Asian College EIS Admin</h2>
-  <img src="assets/logo2-removebg-preview.png" alt="Logo">
-  <div class="menu">
-    <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
-    <ul id="menuItems" class="menuItems">
-    <li><a href="home.php">🏠 Home</a></li>
-    <li><a href="notifications.php">🔔 Notifications</a></li>
-    <li><a href="employee.php">👨‍💼 Employee</a></li>
-    <li><a href="addemployee.php">➕ Add New Employee</a></li>
-    <li><a href="profile.php">👤 Profile</a></li>
-    </ul>
-  </div>
+  <nav class="top-nav">
+    <h2>Asian College EIS ADMIN</h2>
+    <img src="assets/logo2-removebg-preview.png" alt="Logo">
+    <div class="menu">
+      <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
+      <ul id="menuItems" class="menuItems">
+         <li><a href="home.php" class="<?= $currentPage === 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="notifications.php" class="<?= $currentPage === 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="employee.php" class="<?= $currentPage === 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="addemployee.php" class="<?= $currentPage === 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+        <li><a href="profile.php" class="<?= $currentPage === 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
+
+      </ul>
+    </div>
   </nav>
 
-  <div class="main-content">
-  <section id="edit-admin">
-    <h1>✏️ Edit Admin</h1>
-    <form method="POST" enctype="multipart/form-data">
-      
-      <label for="employeeID">Employee ID:</label>
-      <input type="text" id="employeeID" name="employeeID" value="<?= htmlspecialchars($row['employeeID']) ?>" required>
-      
-      <label for="firstname">First Name:</label>
-      <input type="text" id="firstname" name="firstname" value="<?= htmlspecialchars($row['firstName']) ?>" required>
-      
-      <label for="middlename">Middle Name:</label>
-      <input type="text" id="middlename" name="middlename" value="<?= htmlspecialchars($row['middleName']) ?>" required>
-      
-      <label for="lastname">Last Name:</label>
-      <input type="text" id="lastname" name="lastname" value="<?= htmlspecialchars($row['lastName']) ?>" required>
-      
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" value="<?= htmlspecialchars($row['email']) ?>" required>
-      
-      <label for="department">Department:</label>
+  <div class="profile-container">
+    <h1>✏️ Edit Profile</h1>
+    <form method="POST" enctype="multipart/form-data" class="profile-box">
+      <div class="profile-picture">
+        <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;object-fit:cover;">
+        <input type="file" name="picture" accept="image/*">
+      </div>
+
+      <div class="profile-details">
+        <label>First Name:</label>
+        <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>
+
+        <label>Middle Name:</label>
+        <input type="text" name="middleName" value="<?php echo htmlspecialchars($user['middleName']); ?>">
+
+        <label>Last Name:</label>
+        <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
+
+        <label for="department">Department:</label>
         <select id="department" name="department" required>
           <option value="">-- Select Department --</option>
-          <option value="TVET">TVET</option>
-          <option value="CCSE">CCSE</option>
-          <option value="CBAA">CBAA</option>
-          <option value="CTHM">CTHM</option>
-          <option value="SHS">SHS</option>
-       </select>
-      
-      <label for="sex">Sex:</label>
-      <div class="radio-group">
-        <label class="radio-option">
-          <input type="radio" id="male" name="sex" value="Male" <?= ($row['sex'] == 'Male') ? 'checked' : '' ?> required>
-          <span class="radio-custom"></span>
-          <span class="radio-text">Male</span>
-        </label>
-      
-        <label class="radio-option">
-          <input type="radio" id="female" name="sex" value="Female" <?= ($row['sex'] == 'Female') ? 'checked' : '' ?> required>
-          <span class="radio-custom"></span>
-          <span class="radio-text">Female</span>
-        </label>
+          <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
+          <option value="CCSE" <?= $user['department'] == 'CCSE' ? 'selected' : '' ?>>CCSE</option>
+          <option value="CBAA" <?= $user['department'] == 'CBAA' ? 'selected' : '' ?>>CBAA</option>
+          <option value="CTHM" <?= $user['department'] == 'CTHM' ? 'selected' : '' ?>>CTHM</option>
+          <option value="SHS" <?= $user['department'] == 'SHS' ? 'selected' : '' ?>>SHS</option>
+        </select>
+
+        <label>Status:</label>
+        <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">
+
+        <label>Contact Number:</label>
+        <input type="text" name="contactNumber" value="<?php echo htmlspecialchars($user['contactNumber']); ?>">
+
+        <label>Address:</label>
+        <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
+
+        <br><br>
+        <input type="submit" value="💾 Save Changes" class="btn">
+        <a href="employee.php" class="btn btn-logout">❌ Cancel</a>
       </div>
-    
-      <button type="submit" name="update">Update Admin</button>
     </form>
-  </section>
-</div>
+  </div>
 
   <script>
-  const menuBtn = document.getElementById('menuBtn');
-  const menuItems = document.getElementById('menuItems');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuItems = document.getElementById('menuItems');
 
-  let menuOpen = false;
+    let menuOpen = false;
 
-  menuBtn.addEventListener('click', () => {
-    menuOpen = !menuOpen;
-    if (menuOpen) {
-    menuBtn.src = 'assets/closeIcon.png'; 
-    menuItems.classList.add('menuOpen');
-    } else {
-    menuBtn.src = 'assets/menuIcon.png'; 
-    menuItems.classList.remove('menuOpen');
-    }
-  });
+    menuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      if (menuOpen) {
+        menuBtn.src = 'assets/closeIcon.png';
+        menuItems.classList.add('menuOpen');
+      } else {
+        menuBtn.src = 'assets/menuIcon.png';
+        menuItems.classList.remove('menuOpen');
+      }
+    });
 
-  menuItems.addEventListener('click', () => {
-    menuOpen = false;
-    menuBtn.src = 'assets/menuIcon.png';
-    menuItems.classList.remove('menuOpen');
-  });
-
-  function confirmLogout() {
-    if (confirm("Are you sure you want to logout?")) {
-      window.location.href = "logout.php";
-    }
-  }
-
-  document.getElementById('profile').onchange = function (event) {
-    const [file] = this.files;
-    if (file) {
-    const preview = document.getElementById('previewImg');
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = 'block';
-    }
-  };
+    menuItems.addEventListener('click', () => {
+      menuOpen = false;
+      menuBtn.src = 'assets/menuIcon.png';
+      menuItems.classList.remove('menuOpen');
+    });
   </script>
 </body>
 </html>

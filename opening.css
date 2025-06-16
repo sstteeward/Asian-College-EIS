@@ -50,6 +50,7 @@ body {
 
 .opening-container form button:hover {
     background-color: red;
+    font-weight: bold;
     transform: scale(1.05);
 }
 

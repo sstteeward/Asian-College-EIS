@@ -112,6 +112,7 @@ input:focus {
 }
 
 .login-button button:hover {
+    font-weight: bold;
     background-color: red;
     transform: scale(1.05);
 }

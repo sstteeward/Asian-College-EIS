@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
     $lastName = trim($_POST['lastName']);
-    $position = trim($_POST['position']);
+    $department = trim($_POST['department']);
     $status = trim($_POST['status']);
     $contactNumber = trim($_POST['contactNumber']);
     $address = trim($_POST['address']);
@@ -44,9 +44,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileName = $user['picture']; 
     }
 
-    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, position=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
+    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $position, $status, $contactNumber, $address, $fileName, $email);
+    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
     $stmt->execute();
     $stmt->close();
 
@@ -72,10 +72,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="homeemployee.php">🏠 Home</a></li>
-        <li><a href="notifications.php">🔔 Notifications</a></li>
-        <li><a href="employee.php">🧑‍💼 Employee</a></li>
-        <li><a href="viewProfile.php">👤 Profile</a></li>
+       <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -98,8 +98,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Last Name:</label>
         <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
 
-        <label>Position:</label>
-        <input type="text" name="position" value="<?php echo htmlspecialchars($user['position']); ?>">
+        <select id="department" name="department" required>
+          <option value="">-- Select Department --</option>
+          <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
+          <option value="CCSE" <?= $user['department'] == 'CCSE' ? 'selected' : '' ?>>CCSE</option>
+          <option value="CBAA" <?= $user['department'] == 'CBAA' ? 'selected' : '' ?>>CBAA</option>
+          <option value="CTHM" <?= $user['department'] == 'CTHM' ? 'selected' : '' ?>>CTHM</option>
+          <option value="SHS" <?= $user['department'] == 'SHS' ? 'selected' : '' ?>>SHS</option>
+        </select>
 
         <label>Status:</label>
         <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">
@@ -112,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <br><br>
         <input type="submit" value="💾 Save Changes" class="btn">
-        <a href="viewProfile.php" class="btn btn-logout">❌ Cancel</a>
+        <a href="VIEWPROFEMP.php" class="btn btn-logout">❌ Cancel</a>
       </div>
     </form>
   </div>
