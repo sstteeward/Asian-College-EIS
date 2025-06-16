@@ -19,6 +19,9 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
+$error = '';
+$success = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
@@ -28,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contactNumber = trim($_POST['contactNumber']);
     $address = trim($_POST['address']);
 
+    // Handle profile picture
     if (!empty($_FILES["picture"]["name"])) {
         $targetDir = "uploads/";
         $fileName = basename($_FILES["picture"]["name"]);
@@ -38,26 +42,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (in_array(strtolower($fileType), $allowedTypes)) {
             move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath);
         } else {
-            $fileName = $user['picture']; 
+            $fileName = $user['picture'];
         }
     } else {
-        $fileName = $user['picture']; 
+        $fileName = $user['picture'];
     }
 
-    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
-    $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
+    // Change password if fields are filled
+    $newPassword = trim($_POST['newPassword'] ?? '');
+    $confirmPassword = trim($_POST['confirmPassword'] ?? '');
+
+    if (!empty($newPassword) || !empty($confirmPassword)) {
+        if ($newPassword !== $confirmPassword) {
+            $error = "Passwords do not match.";
+        } elseif (strlen($newPassword) < 6) {
+            $error = "Password must be at least 6 characters.";
+        } else {
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=?, password=? WHERE email=?";
+            $stmt = $conn->prepare($updateQuery);
+            $stmt->bind_param("ssssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $hashedPassword, $email);
+            $stmt->execute();
+            $stmt->close();
+            $success = "Profile and password updated successfully.";
+        }
+    } else {
+        $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
+        $stmt = $conn->prepare($updateQuery);
+        $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
+        $stmt->execute();
+        $stmt->close();
+        $success = "Profile updated successfully.";
+    }
+
+    // Reload updated user info
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
     $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
     $stmt->close();
-
-    header("Location: profile.php");
-    exit();
-
-    
 }
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -69,7 +97,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <title>Asian College EIS Admin</title>
 </head>
 <body>
-  <nav class="top-nav">
+<nav class="top-nav">
     <h2>Asian College EIS Admin</h2>
     <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
@@ -82,10 +110,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <li><a href="profile.php" class="<?= $currentPage === 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
       </ul>
     </div>
-  </nav>
+</nav>
 
-  <div class="profile-container">
+<div class="profile-container">
     <h1>✏️ Edit Profile</h1>
+
+    <?php if ($error): ?>
+        <p style="color: red; text-align: center;"><?php echo $error; ?></p>
+    <?php elseif ($success): ?>
+        <p style="color: green; text-align: center;"><?php echo $success; ?></p>
+    <?php endif; ?>
+
     <form method="POST" enctype="multipart/form-data" class="profile-box">
       <div class="profile-picture">
         <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;">
@@ -105,11 +140,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label for="department">Department:</label>
         <select id="department" name="department" required>
           <option value="">-- Select Department --</option>
-          <option value="DPD">DPD</option>
-          <option value="CCSE">CCSE</option>
-          <option value="CBAA">CBAA</option>
-          <option value="CTHM">CTHM</option>
-          <option value="SHS">SHS</option>
+          <?php
+            $departments = ['DPD', 'CCSE', 'CBAA', 'CTHM', 'SHS'];
+            foreach ($departments as $dep) {
+                $selected = $user['department'] === $dep ? 'selected' : '';
+                echo "<option value=\"$dep\" $selected>$dep</option>";
+            }
+          ?>
         </select>
 
         <label>Status:</label>
@@ -121,41 +158,38 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label>Address:</label>
         <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
 
+        <hr style="margin: 20px 0;">
+
+        <h3>🔐 Change Password</h3>
+        <label>New Password:</label>
+        <input type="password" name="newPassword" placeholder="Enter new password">
+
+        <label>Confirm Password:</label>
+        <input type="password" name="confirmPassword" placeholder="Re-enter new password">
+
         <br><br>
         <input type="submit" value="💾 Save Changes" class="btn">
         <a href="profile.php" class="btn btn-logout">❌ Cancel</a>
       </div>
     </form>
-  </div>
+</div>
 
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const menuItems = document.getElementById('menuItems');
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const menuItems = document.getElementById('menuItems');
+let menuOpen = false;
 
-    let menuOpen = false;
+menuBtn.addEventListener('click', () => {
+  menuOpen = !menuOpen;
+  menuBtn.src = menuOpen ? 'assets/closeIcon.png' : 'assets/menuIcon.png';
+  menuItems.classList.toggle('menuOpen');
+});
 
-    menuBtn.addEventListener('click', () => {
-      menuOpen = !menuOpen;
-      if (menuOpen) {
-        menuBtn.src = 'assets/closeIcon.png'; 
-        menuItems.classList.add('menuOpen');
-      } else {
-        menuBtn.src = 'assets/menuIcon.png'; 
-        menuItems.classList.remove('menuOpen');
-      }
-    });
-
-    menuItems.addEventListener('click', () => {
-      menuOpen = false;
-      menuBtn.src = 'assets/menuIcon.png';
-      menuItems.classList.remove('menuOpen');
-    });
-
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
-    }
-  </script>
+menuItems.addEventListener('click', () => {
+  menuOpen = false;
+  menuBtn.src = 'assets/menuIcon.png';
+  menuItems.classList.remove('menuOpen');
+});
+</script>
 </body>
 </html>

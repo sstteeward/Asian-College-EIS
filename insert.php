@@ -16,11 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $department = trim($_POST['department'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $sex = trim($_POST['sex'] ?? '');
+    $password = trim($_POST['password'] ?? ''); // NEW
 
     // Validate required fields
     if (
         empty($id) || empty($firstName) || empty($lastName) || empty($email) ||
-        empty($department) || empty($role) || empty($sex)
+        empty($department) || empty($role) || empty($sex) || empty($password) // updated
     ) {
         header("Location: addemployee.php?error=missing");
         exit();
@@ -32,10 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         exit();
     }
 
-    // Format names: capitalize and remove extra spaces
+    // Format names
     $firstName = ucwords(strtolower(preg_replace('/\s+/', ' ', $firstName)));
     $middleName = ucwords(strtolower(preg_replace('/\s+/', ' ', $middleName)));
     $lastName = ucwords(strtolower(preg_replace('/\s+/', ' ', $lastName)));
+
+    // Hash password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
     $table = strtolower($role) === 'admin' ? 'admin_' : 'employeeuser';
 
@@ -67,13 +71,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         exit();
     }
 
-    // Insert new record
+    // Insert record with password
     $insertSql = "INSERT INTO $table 
-        (employeeID, firstName, middleName, lastName, email, department, sex, registryDate, addedBy) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+        (employeeID, firstName, middleName, lastName, email, department, sex, password, registryDate, addedBy) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
 
     $stmtInsert = $conn->prepare($insertSql);
-    $stmtInsert->bind_param("sssssssi", $id, $firstName, $middleName, $lastName, $email, $department, $sex, $addedBy);
+    $stmtInsert->bind_param("ssssssssi", $id, $firstName, $middleName, $lastName, $email, $department, $sex, $hashedPassword, $addedBy);
 
     if ($stmtInsert->execute()) {
         header("Location: addemployee.php?success=1");

@@ -75,7 +75,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <meta charset="UTF-8">
   <link rel="stylesheet" href="editProfile.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/LOGO for title.png">
+  <link rel="icon" href="assets\logo.png">
   <title>Asian College EIS</title>
 </head>
 <body>
@@ -96,7 +96,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   </nav>
 
   <div class="profile-container">
-    <h1>✏️ Edit Profile</h1>
+    <h1>✏️ Edit Admin</h1>
     <form method="POST" enctype="multipart/form-data" class="profile-box">
       <div class="profile-picture">
         <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;object-fit:cover;">
@@ -104,6 +104,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       </div>
 
       <div class="profile-details">
+
+        <label for="id">Employee ID:</label>
+        <input type="text" id="id" name="id" required />
+
         <label>First Name:</label>
         <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>
 

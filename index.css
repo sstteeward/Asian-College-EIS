@@ -156,3 +156,13 @@ input:focus {
     text-align: center;
     animation: fadeIn 0.5s ease-in;
 }
+
+.reset-message {
+    background-color: #eef6ff;
+    color: #333;
+    padding: 10px 15px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-size: 14px;
+}

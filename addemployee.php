@@ -138,6 +138,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label for="lastName">Last Name:</label>
         <input type="text" id="lastName" name="lastName" required />
 
+        <label for="password">Temporary Password:</label>
+        <input type="password" id="password" name="password" required />
+
+
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
 
