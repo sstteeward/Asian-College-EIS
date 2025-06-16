@@ -4,7 +4,7 @@ include 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = trim($_POST['email']);
-    $inputID = trim($_POST['id']);
+    $password = trim($_POST['password']);
     $role = trim($_POST['role']);
 
     $_SESSION['last_role'] = $role;
@@ -17,21 +17,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     $table = $role === 'admin' ? 'admin_' : 'employeeuser';
 
-    $stmt = $conn->prepare("SELECT firstName, employeeID FROM $table WHERE email = ?");
+    $stmt = $conn->prepare("SELECT firstName, password FROM $table WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($firstName, $hashedID);
+        $stmt->bind_result($firstName, $hashedPassword);
         $stmt->fetch();
 
-        if (password_verify($inputID, $hashedID)) {
+        if (password_verify($password, $hashedPassword)) {
             $_SESSION['email'] = $email;
             $_SESSION['role'] = $role;
             $_SESSION['firstName'] = $firstName;
 
-            header("Location: welcome.php"); // Or employee dashboard
+            header("Location: welcome.php");
             exit();
         }
     }

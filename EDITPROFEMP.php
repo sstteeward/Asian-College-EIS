@@ -19,7 +19,8 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Update profile
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_changes'])) {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
     $lastName = trim($_POST['lastName']);
@@ -29,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = trim($_POST['address']);
 
     if (!empty($_FILES["picture"]["name"])) {
-        $targetDir = "Employee\uploads";
+        $targetDir = "uploads/";
         $fileName = basename($_FILES["picture"]["name"]);
         $targetFilePath = $targetDir . $fileName;
         $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
@@ -38,10 +39,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (in_array(strtolower($fileType), $allowedTypes)) {
             move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath);
         } else {
-            $fileName = $user['picture']; 
+            $fileName = $user['picture'];
         }
     } else {
-        $fileName = $user['picture']; 
+        $fileName = $user['picture'];
     }
 
     $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
@@ -53,14 +54,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: viewProfile.php");
     exit();
 }
-?>
 
+// Change password
+$passwordMessage = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
+    $oldPassword = $_POST['oldPassword'];
+    $newPassword = $_POST['newPassword'];
+    $confirmPassword = $_POST['confirmPassword'];
+
+    $checkQuery = "SELECT password FROM $table WHERE email = ?";
+    $stmt = $conn->prepare($checkQuery);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!password_verify($oldPassword, $row['password'])) {
+        $passwordMessage = "<p style='color:red;'>❌ Incorrect old password.</p>";
+    } elseif ($newPassword !== $confirmPassword) {
+        $passwordMessage = "<p style='color:red;'>❌ New passwords do not match.</p>";
+    } elseif (strlen($newPassword) < 6) {
+        $passwordMessage = "<p style='color:red;'>❌ Password must be at least 6 characters.</p>";
+    } else {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updatePass = "UPDATE $table SET password=? WHERE email=?";
+        $stmt = $conn->prepare($updatePass);
+        $stmt->bind_param("ss", $hashedPassword, $email);
+        $stmt->execute();
+        $stmt->close();
+        $passwordMessage = "<p style='color:green;'>✅ Password successfully changed!</p>";
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="editProfile.css">
+  <link rel="stylesheet" href="EDITPROFEMP.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/LOGO for title.png">
   <title>Asian College EIS</title>
@@ -72,10 +104,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-       <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
-        <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
-        <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
-        <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
+        <li><a href="HOMEEMP.php">🏠 Home</a></li>
+        <li><a href="NOTIFEMP.php">🔔 Notifications</a></li>
+        <li><a href="EMPLOYEEEMP.php">👨‍💼 Employee</a></li>
+        <li><a href="VIEWPROFEMP.php">👤 Profile</a></li>
       </ul>
     </div>
   </nav>
@@ -98,6 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Last Name:</label>
         <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
 
+        <label>Department:</label>
         <select id="department" name="department" required>
           <option value="">-- Select Department --</option>
           <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
@@ -117,8 +150,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
 
         <br><br>
-        <input type="submit" value="💾 Save Changes" class="btn">
+        <input type="submit" name="save_changes" value="💾 Save Changes" class="btn">
         <a href="VIEWPROFEMP.php" class="btn btn-logout">❌ Cancel</a>
+
+        <br><br>
+        <button type="button" onclick="togglePasswordForm()" class="btn" style="background-color:#ffc107;">🛠️ Change Password</button>
+
+        <div id="passwordForm" style="display:none; margin-top:20px;">
+          <h3>🔑 Change Password</h3>
+          <?php echo $passwordMessage; ?>
+
+          <label>Old Password:</label>
+          <input type="password" name="oldPassword" required>
+
+          <label>New Password:</label>
+          <input type="password" name="newPassword" required>
+
+          <label>Confirm New Password:</label>
+          <input type="password" name="confirmPassword" required>
+
+          <input type="submit" name="change_password" value="🔒 Change Password" class="btn">
+        </div>
       </div>
     </form>
   </div>
@@ -126,30 +178,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
-
     let menuOpen = false;
 
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
-      if (menuOpen) {
-        menuBtn.src = 'assets/closeIcon.png'; 
-        menuItems.classList.add('menuOpen');
-      } else {
-        menuBtn.src = 'assets/menuIcon.png'; 
-        menuItems.classList.remove('menuOpen');
-      }
+      menuBtn.src = menuOpen ? 'assets/closeIcon.png' : 'assets/menuIcon.png';
+      menuItems.classList.toggle('menuOpen');
     });
 
-    menuItems.addEventListener('click', () => {
-      menuOpen = false;
-      menuBtn.src = 'assets/menuIcon.png';
-      menuItems.classList.remove('menuOpen');
-    });
-
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
+    function togglePasswordForm() {
+      const form = document.getElementById('passwordForm');
+      form.style.display = form.style.display === "none" ? "block" : "none";
     }
   </script>
 </body>

@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $stmt->close();
-        header("Location: VIEWPROFEMP.php");
+        header("Location: employee.php");
         exit();
     } else {
         echo "Error updating profile: " . $stmt->error;

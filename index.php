@@ -24,7 +24,6 @@ if (empty($_SESSION['csrf_token'])) {
     <?php unset($_SESSION['reset_message']); ?>
 <?php endif; ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,7 +56,7 @@ if (empty($_SESSION['csrf_token'])) {
 
     <section id="login-form" class="login <?= $showLogin ? '' : 'hidden' ?>">
       <?php if ($showLogin): ?>
-        <div class="error-message">⚠️ Invalid email, ID, or role.</div>
+        <div class="error-message">⚠️ Invalid email, password, or role.</div>
       <?php endif; ?>
 
       <form action="login.php" method="post" autocomplete="off">
@@ -74,10 +73,10 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
 
         <div class="login-input">
-          <label for="id">Password (or ID):</label>
-          <input type="password" name="id" id="id" placeholder="Enter your ID or password" maxlength="50" required onpaste="return false;" />
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" placeholder="Enter your password" maxlength="50" required onpaste="return false;" />
           <label class="show-id-toggle">
-            <input type="checkbox" id="show-id" /> Show Password/ID
+            <input type="checkbox" id="show-password" /> Show Password
           </label>
         </div>
 
@@ -109,8 +108,8 @@ if (empty($_SESSION['csrf_token'])) {
     const roleSelect = document.getElementById('role-select');
     const loginForm = document.getElementById('login-form');
     const roleInput = document.getElementById('role-input');
-    const showIDCheckbox = document.getElementById('show-id');
-    const idInput = document.getElementById('id');
+    const showPasswordCheckbox = document.getElementById('show-password');
+    const passwordInput = document.getElementById('password');
 
     roleSelect.addEventListener('change', () => {
       const selectedRole = roleSelect.value;
@@ -120,8 +119,8 @@ if (empty($_SESSION['csrf_token'])) {
       }
     });
 
-    showIDCheckbox.addEventListener('change', () => {
-      idInput.type = showIDCheckbox.checked ? 'text' : 'password';
+    showPasswordCheckbox.addEventListener('change', () => {
+      passwordInput.type = showPasswordCheckbox.checked ? 'text' : 'password';
     });
 
     window.addEventListener('DOMContentLoaded', () => {

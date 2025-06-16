@@ -20,11 +20,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ($newPassword !== $confirmPassword) {
         $error = "❌ Passwords do not match.";
     } else {
-        $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("UPDATE $table SET employeeID = ? WHERE email = ?");
-        $stmt->bind_param("ss", $hashed, $email);
+        // Hash the new password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        // ⚠️ WARNING: You're storing the password in the employeeID field — it's better to use a separate 'password' column.
+        $stmt = $conn->prepare("UPDATE $table SET password = ? WHERE email = ?");
+        $stmt->bind_param("ss", $hashedPassword, $email);
         $stmt->execute();
 
+        // Clear reset session and notify user
         unset($_SESSION['reset_email'], $_SESSION['reset_role']);
         $_SESSION['reset_success'] = "✅ Password successfully reset. Please login.";
         header("Location: index.php");
