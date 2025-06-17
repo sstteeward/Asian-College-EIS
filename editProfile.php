@@ -19,10 +19,11 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-$error = '';
-$success = '';
+$passwordMessage = "";
+$showPasswordForm = false;
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Update profile
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_changes'])) {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
     $lastName = trim($_POST['lastName']);
@@ -31,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contactNumber = trim($_POST['contactNumber']);
     $address = trim($_POST['address']);
 
-    // Handle profile picture
     if (!empty($_FILES["picture"]["name"])) {
         $targetDir = "uploads/";
         $fileName = basename($_FILES["picture"]["name"]);
@@ -48,148 +48,170 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileName = $user['picture'];
     }
 
-    // Change password if fields are filled
-    $newPassword = trim($_POST['newPassword'] ?? '');
-    $confirmPassword = trim($_POST['confirmPassword'] ?? '');
+    $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
+    $stmt->execute();
+    $stmt->close();
 
-    if (!empty($newPassword) || !empty($confirmPassword)) {
-        if ($newPassword !== $confirmPassword) {
-            $error = "Passwords do not match.";
-        } elseif (strlen($newPassword) < 6) {
-            $error = "Password must be at least 6 characters.";
-        } else {
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=?, password=? WHERE email=?";
-            $stmt = $conn->prepare($updateQuery);
-            $stmt->bind_param("ssssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $hashedPassword, $email);
-            $stmt->execute();
-            $stmt->close();
-            $success = "Profile and password updated successfully.";
-        }
-    } else {
-        $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
-        $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
-        $stmt->execute();
-        $stmt->close();
-        $success = "Profile updated successfully.";
-    }
+    header("Location: profile.php");
+    exit();
+}
 
-    // Reload updated user info
-    $stmt = $conn->prepare($query);
+// Change password
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
+    $oldPassword = $_POST['oldPassword'];
+    $newPassword = $_POST['newPassword'];
+    $confirmPassword = $_POST['confirmPassword'];
+    $showPasswordForm = true;
+
+    $checkQuery = "SELECT password FROM $table WHERE email = ?";
+    $stmt = $conn->prepare($checkQuery);
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+    $row = $result->fetch_assoc();
     $stmt->close();
-}
 
-$currentPage = basename($_SERVER['PHP_SELF']);
+    if (!password_verify($oldPassword, $row['password'])) {
+        $passwordMessage = "<p class='error-msg'>❌ Incorrect old password.</p>";
+    } elseif ($newPassword !== $confirmPassword) {
+        $passwordMessage = "<p class='error-msg'>❌ New passwords do not match.</p>";
+    } elseif (strlen($newPassword) < 6) {
+        $passwordMessage = "<p class='error-msg'>❌ Password must be at least 6 characters.</p>";
+    } else {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updatePass = "UPDATE $table SET password=? WHERE email=?";
+        $stmt = $conn->prepare($updatePass);
+        $stmt->bind_param("ss", $hashedPassword, $email);
+        $stmt->execute();
+        $stmt->close();
+        $passwordMessage = "<p class='success-msg'>✅ Password successfully changed!</p>";
+        $showPasswordForm = false;
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="editProfile.css">
+  <link rel="stylesheet" href="EDITPROFEMP.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/LOGO for title.png">
-  <title>Asian College EIS Admin</title>
+  <title>Asian College EIS</title>
+  <style>
+    .error-msg {
+      color: red;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .success-msg {
+      color: green;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    #passwordForm {
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 <nav class="top-nav">
-    <h2>Asian College EIS Admin</h2>
-    <img src="assets/logo2-removebg-preview.png" alt="Logo">
-    <div class="menu">
-      <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
-      <ul id="menuItems" class="menuItems">
-        <li><a href="home.php" class="<?= $currentPage === 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
-        <li><a href="notifications.php" class="<?= $currentPage === 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
-        <li><a href="employee.php" class="<?= $currentPage === 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
-        <li><a href="addemployee.php" class="<?= $currentPage === 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
-        <li><a href="profile.php" class="<?= $currentPage === 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
-      </ul>
-    </div>
+  <h2>Asian College EIS Admin</h2>
+  <img src="assets/logo2-removebg-preview.png" alt="Logo">
+  <div class="menu">
+    <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
+    <ul id="menuItems" class="menuItems">
+      <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+        <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
+    </ul>
+  </div>
 </nav>
 
 <div class="profile-container">
-    <h1>✏️ Edit Profile</h1>
+  <h1>✏️ Edit Profile</h1>
+  <form method="POST" enctype="multipart/form-data" class="profile-box">
+    <div class="profile-picture">
+      <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;">
+      <input type="file" name="picture" accept="image/*">
+    </div>
 
-    <?php if ($error): ?>
-        <p style="color: red; text-align: center;"><?php echo $error; ?></p>
-    <?php elseif ($success): ?>
-        <p style="color: green; text-align: center;"><?php echo $success; ?></p>
-    <?php endif; ?>
+    <div class="profile-details">
+      <label>First Name:</label>
+      <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>
 
-    <form method="POST" enctype="multipart/form-data" class="profile-box">
-      <div class="profile-picture">
-        <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;">
-        <input type="file" name="picture" accept="image/*">
-      </div>
+      <label>Middle Name:</label>
+      <input type="text" name="middleName" value="<?php echo htmlspecialchars($user['middleName']); ?>">
 
-      <div class="profile-details">
-        <label>First Name:</label>
-        <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>
+      <label>Last Name:</label>
+      <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
 
-        <label>Middle Name:</label>
-        <input type="text" name="middleName" value="<?php echo htmlspecialchars($user['middleName']); ?>">
+      <label>Department:</label>
+      <select id="department" name="department" required>
+        <option value="">-- Select Department --</option>
+        <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
+        <option value="CCSE" <?= $user['department'] == 'CCSE' ? 'selected' : '' ?>>CCSE</option>
+        <option value="CBAA" <?= $user['department'] == 'CBAA' ? 'selected' : '' ?>>CBAA</option>
+        <option value="CTHM" <?= $user['department'] == 'CTHM' ? 'selected' : '' ?>>CTHM</option>
+        <option value="SHS" <?= $user['department'] == 'SHS' ? 'selected' : '' ?>>SHS</option>
+      </select>
 
-        <label>Last Name:</label>
-        <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
+      <label>Status:</label>
+      <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">
 
-        <label for="department">Department:</label>
-        <select id="department" name="department" required>
-          <option value="">-- Select Department --</option>
-          <?php
-            $departments = ['DPD', 'CCSE', 'CBAA', 'CTHM', 'SHS'];
-            foreach ($departments as $dep) {
-                $selected = $user['department'] === $dep ? 'selected' : '';
-                echo "<option value=\"$dep\" $selected>$dep</option>";
-            }
-          ?>
-        </select>
+      <label>Contact Number:</label>
+      <input type="text" name="contactNumber" value="<?php echo htmlspecialchars($user['contactNumber']); ?>">
 
-        <label>Status:</label>
-        <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">
+      <label>Address:</label>
+      <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
 
-        <label>Contact Number:</label>
-        <input type="text" name="contactNumber" value="<?php echo htmlspecialchars($user['contactNumber']); ?>">
+      <br><br>
+      <input type="submit" name="save_changes" value="💾 Save Changes" class="btn">
+      <a href="profile.php" class="btn btn-logout">❌ Cancel</a>
 
-        <label>Address:</label>
-        <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
+      <br><br>
+      <button type="button" onclick="togglePasswordForm()" class="btn" style="background-color:#ffc107;">🛠️ Change Password</button>
 
-        <hr style="margin: 20px 0;">
+      <div id="passwordForm" style="display: <?= $showPasswordForm ? 'block' : 'none' ?>; margin-top:20px;">
+        <h3>🔑 Change Password</h3>
+        <?php echo $passwordMessage; ?>
 
-        <h3>🔐 Change Password</h3>
+        <label>Old Password:</label>
+        <input type="password" name="oldPassword" required>
+
         <label>New Password:</label>
-        <input type="password" name="newPassword" placeholder="Enter new password">
+        <input type="password" name="newPassword" required>
 
-        <label>Confirm Password:</label>
-        <input type="password" name="confirmPassword" placeholder="Re-enter new password">
+        <label>Confirm New Password:</label>
+        <input type="password" name="confirmPassword" required>
 
-        <br><br>
-        <input type="submit" value="💾 Save Changes" class="btn">
-        <a href="profile.php" class="btn btn-logout">❌ Cancel</a>
+        <input type="submit" name="change_password" value="🔒 Change Password" class="btn">
       </div>
-    </form>
+    </div>
+  </form>
 </div>
 
 <script>
 const menuBtn = document.getElementById('menuBtn');
 const menuItems = document.getElementById('menuItems');
 let menuOpen = false;
-
 menuBtn.addEventListener('click', () => {
   menuOpen = !menuOpen;
   menuBtn.src = menuOpen ? 'assets/closeIcon.png' : 'assets/menuIcon.png';
   menuItems.classList.toggle('menuOpen');
 });
 
-menuItems.addEventListener('click', () => {
-  menuOpen = false;
-  menuBtn.src = 'assets/menuIcon.png';
-  menuItems.classList.remove('menuOpen');
-});
+function togglePasswordForm() {
+  const form = document.getElementById('passwordForm');
+  form.style.display = form.style.display === "none" ? "block" : "none";
+}
 </script>
 </body>
 </html>

@@ -31,6 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $_SESSION['role'] = $role;
             $_SESSION['firstName'] = $firstName;
 
+            // ✅ Update last_login time (accurately)
+            date_default_timezone_set('Asia/Manila');
+            $now = date("Y-m-d H:i:s");
+            $update = $conn->prepare("UPDATE $table SET last_login = ? WHERE email = ?");
+            $update->bind_param("ss", $now, $email);
+            $update->execute();
+            $update->close();
+
             header("Location: welcome.php");
             exit();
         }

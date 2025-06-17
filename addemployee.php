@@ -271,6 +271,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div class="footer-content">
       <div class="footer-section">
         <p>&copy; <?= date("Y") ?> <strong>Asian College</strong>. All rights reserved.</p>
+        <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
+        IT Department
+      </a>
       </div>
       <div class="footer-section quick-links">
         <a href="profile.php">👤 Profile</a>

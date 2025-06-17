@@ -49,14 +49,14 @@ $profilePic = 'uploads/' . basename($filename);
 $fullName = trim($user['firstName'] . ' ' . ($user['middleName'] ? $user['middleName'] . ' ' : '') . $user['lastName']);
 
 // Get current page for active menu highlight
-$current_page = basename($_SERVER['PHP_SELF']);
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="profile.css" />
+  <link rel="stylesheet" href="VIEWPROFEMP.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="assets/logo.png" />
   <title>Asian College EIS Admin</title>
@@ -236,6 +236,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="footer-content">
       <div class="footer-section">
         <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
+        <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
+        IT Department
+      </a>
       </div>
 
       <div class="footer-section quick-links">

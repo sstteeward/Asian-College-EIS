@@ -10,13 +10,16 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 date_default_timezone_set('Asia/Manila');
 $email = $_SESSION['email'];
 
-$query = "SELECT firstName FROM admin_ WHERE email = ?";
+$query = "SELECT firstName, picture, last_login FROM admin_ WHERE email = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $email);
 $stmt->execute();
-$stmt->bind_result($firstName);
-$name = $stmt->fetch() ? $firstName : '';
+$stmt->bind_result($firstName, $profilePic, $lastLogin);
+$stmt->fetch();
 $stmt->close();
+
+$name = $firstName;
+$displayPic = $profilePic && file_exists("uploads/" . $profilePic) ? "uploads/" . $profilePic : "avatar.php?name=" . urlencode($name);
 
 $totalAdmins = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM admin_"))['total'];
 $totalEmployees = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM employeeuser"))['total'];
@@ -30,6 +33,8 @@ $recentQuery = "
 ";
 $recentResult = mysqli_query($conn, $recentQuery);
 
+$logins = mysqli_query($conn, "SELECT firstName, lastName, last_login FROM admin_ WHERE last_login IS NOT NULL ORDER BY last_login DESC LIMIT 5");
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
@@ -38,70 +43,97 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <meta charset="UTF-8">
   <link rel="stylesheet" href="home.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets\logo.png">
+  <link rel="icon" href="assets/logo.png">
   <title>Asian College EIS Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <style>
   .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+  }
 
-    .modal-box {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      max-width: 400px;
-      width: 90%;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+  .modal-box {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 90%;
+    animation: fadeIn 0.3s ease-in-out;
+  }
 
-    .modal-buttons {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: space-around;
-      gap: 1rem;
-    }
+  .modal-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+  }
 
-    .btn-confirm {
-      background-color: red;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .btn-confirm:hover {
-      background-color: darkred;
-    }
+  .btn-confirm {
+    background-color: red;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .btn-confirm:hover {
+    background-color: darkred;
+  }
 
-    .btn-cancel {
-      background-color: #bdc3c7;
-      color: #333;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .btn-cancel:hover {
-      background-color: #95a5a6;
-    }
+  .btn-cancel {
+    background-color: #bdc3c7;
+    color: #333;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .btn-cancel:hover {
+    background-color: #95a5a6;
+  }
 
-    @keyframes fadeIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+  @keyframes fadeIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .welcome-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .profile-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+  }
+.chart-container {
+  max-width: 300px; /* previously 500px */
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+  .recent-logins, .recent {
+    margin-top: 2rem;
+  }
+
 </style>
 <body>
   <nav class="top-nav">
@@ -119,7 +151,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   </nav>
 
   <div class="dashboard">
-    <h1>Welcome, <?php echo htmlspecialchars($name); ?>!</h1>
+    <div class="welcome-header">
+      <img src="<?php echo $displayPic; ?>" alt="Profile Picture" class="profile-thumbnail">
+      <div>
+        <h1>Welcome, <?php echo htmlspecialchars($name); ?>!</h1>
+        <small>Last login: <?php echo $lastLogin ? date('m/d/Y h:i A', strtotime($lastLogin)) : 'First time login'; ?></small>
+      </div>
+    </div>
 
     <div class="stats">
       <div class="card">
@@ -130,6 +168,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <h2><?php echo $totalEmployees; ?></h2>
         <p>Total Employees</p>
       </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="userChart" width="300" height="300"></canvas>
     </div>
 
     <div class="quick-actions">
@@ -147,9 +189,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </div>
       <?php endwhile; ?>
     </div>
+
+    <div class="recent-logins">
+      <h3>🧾 Recent Logins</h3>
+      <?php while($log = mysqli_fetch_assoc($logins)): ?>
+        <div class="recent-item">
+          <p><strong><?php echo htmlspecialchars($log['firstName'] . ' ' . $log['lastName']); ?></strong></p>
+          <small><?php echo date('m/d/Y g:i A', strtotime($log['last_login'])); ?></small>
+        </div>
+      <?php endwhile; ?>
+    </div>
   </div>
 
-    <!-- Logout Confirmation Modal -->
+  <!-- Logout Confirmation Modal -->
   <div id="logoutModal" class="modal-overlay">
     <div class="modal-box">
       <h3>Confirm Logout</h3>
@@ -164,18 +216,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <script>
     const menuBtn = document.getElementById('menuBtn');
     const menuItems = document.getElementById('menuItems');
-
     let menuOpen = false;
 
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
-      if (menuOpen) {
-        menuBtn.src = 'assets/black_closeIcon.png'; 
-        menuItems.classList.add('menuOpen');
-      } else {
-        menuBtn.src = 'assets/black_menuIcon.png'; 
-        menuItems.classList.remove('menuOpen');
-      }
+      menuBtn.src = menuOpen ? 'assets/black_closeIcon.png' : 'assets/black_menuIcon.png';
+      menuItems.classList.toggle('menuOpen');
     });
 
     menuItems.addEventListener('click', () => {
@@ -184,7 +230,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       menuItems.classList.remove('menuOpen');
     });
 
-     function confirmLogout() {
+    function confirmLogout() {
       document.getElementById('logoutModal').style.display = 'flex';
     }
 
@@ -195,12 +241,35 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     function proceedLogout() {
       window.location.href = "logout.php";
     }
+
+    // Chart.js for Admins vs Employees
+    const ctx = document.getElementById('userChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Admins', 'Employees'],
+            datasets: [{
+                data: [<?php echo $totalAdmins; ?>, <?php echo $totalEmployees; ?>],
+                backgroundColor: ['#3498db', '#2ecc71'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+        }
+    });
   </script>
 
 <footer class="footer">
   <div class="footer-content">
     <div class="footer-section">
       <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
+       <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
+        IT Department
+      </a>
     </div>
 
     <div class="footer-section quick-links">
@@ -226,7 +295,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
 </footer>
-
 
 </body>
 </html>

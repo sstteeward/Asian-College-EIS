@@ -210,7 +210,6 @@ h1 {
   border: 2px solid blue;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.3s ease-in-out;
 }
 
 #passwordForm h3 {
@@ -234,13 +233,6 @@ h1 {
   margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  transition: border 0.2s;
-}
-
-#passwordForm input[type="password"]:focus {
-  border: 2px solid blue;
-  outline: none;
-  background-color: #fffde7;
 }
 
 #passwordForm input[type="submit"] {
@@ -252,17 +244,13 @@ h1 {
   border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-#passwordForm input[type="submit"]:hover {
-  background-color: blue;
 }
 
 #passwordForm p {
   margin-top: 10px;
   font-weight: bold;
 }
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
