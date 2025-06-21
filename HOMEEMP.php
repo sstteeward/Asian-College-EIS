@@ -286,9 +286,8 @@ $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good
     </div>
 
     <div class="quick-actions">
-      <a href="addemployee.php">➕ Add New Employee</a>
-      <a href="employee.php">👨‍💼 View Employees</a>
-      <a href="notifications.php">🔔 View Notifications</a>
+      <a href="EMPLOYEEEMP.php">👨‍💼 View Employees</a>
+      <a href="NOTIFEMP.php">🔔 View Notifications</a>
     </div>
 
     <div class="recent">
