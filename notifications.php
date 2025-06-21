@@ -48,7 +48,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body>
   <nav class="top-nav">
-    <h2>Asian College EIS Admin</h2>
+    <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS Admin</h2>
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
@@ -142,7 +142,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <footer class="footer">
   <div class="footer-content">
     <div class="footer-section">
-      <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
+      <p>&copy; <?php echo date("Y"); ?> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong>. All rights reserved.</p>
        <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
         IT Department
       </a>
@@ -150,7 +150,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <div class="footer-section quick-links">
       <a href="profile.php">👤 Profile</a>
-      <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
+      <a href="mailto:edfaburada.student@asiancollege.edu.ph">❓ Help</a>
+      <a href="mailto:jdacademia.student@asiancollege.edu.ph">📝 Feedback</a>
       <a href="#" onclick="confirmLogout()">🚪 Logout</a>
     </div>
 

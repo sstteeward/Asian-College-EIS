@@ -10,7 +10,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 date_default_timezone_set('Asia/Manila');
 $email = $_SESSION['email'];
 
-$query = "SELECT firstName, picture, last_login FROM admin_ WHERE email = ?";
+// Fetch admin info
+$query = "SELECT firstName, picture, last_login FROM admin_ WHERE email = ? LIMIT 1";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -18,7 +19,7 @@ $stmt->bind_result($firstName, $profilePic, $lastLogin);
 $stmt->fetch();
 $stmt->close();
 
-$name = $firstName;
+$name = htmlspecialchars($firstName);
 $displayPic = $profilePic && file_exists("uploads/" . $profilePic) ? "uploads/" . $profilePic : "avatar.php?name=" . urlencode($name);
 
 $totalAdmins = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM admin_"))['total'];
@@ -33,145 +34,256 @@ $recentQuery = "
 ";
 $recentResult = mysqli_query($conn, $recentQuery);
 
-$logins = mysqli_query($conn, "SELECT firstName, lastName, last_login FROM admin_ WHERE last_login IS NOT NULL ORDER BY last_login DESC LIMIT 5");
+$logins = mysqli_query($conn, "
+    SELECT firstName, lastName, last_login 
+    FROM admin_ 
+    WHERE last_login IS NOT NULL 
+    ORDER BY last_login DESC 
+    LIMIT 5
+");
 
 $currentPage = basename($_SERVER['PHP_SELF']);
+$hour = date('H');
+$greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="home.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/logo.png">
-  <title>Asian College EIS Admin</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="home.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="assets/logo.png" />
+  <title>Asian College EIS</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .menuItems {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .menuItems a {
+      text-decoration: none;
+      color: #333;
+      padding: 0.4rem 0.8rem;
+      border-bottom: 2px solid transparent;
+    }
+
+    .menuItems a.active {
+      border-bottom: 2px solid red;
+      font-weight: bold;
+    }
+
+    .dashboard {
+      padding: 2rem;
+    }
+
+    .welcome-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .profile-thumbnail {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ccc;
+    }
+
+    .stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+      transition: 0.2s ease-in-out;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .quick-actions {
+      margin-top: 2rem;
+    }
+
+    .quick-actions a {
+      display: inline-block;
+      background: #3498db;
+      color: white;
+      padding: 0.6rem 1rem;
+      margin: 0.3rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+
+    .quick-actions a:hover {
+      background: #2980b9;
+    }
+
+    .recent, .recent-logins {
+      margin-top: 2.5rem;
+    }
+
+    .recent-item {
+      background: #ffffff;
+      border-left: 4px solid #3498db;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .recent-item:hover {
+      background: #f1f1f1;
+    }
+
+    .chart-container {
+      max-width: 300px;
+      margin: 2rem auto;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-confirm, .btn-cancel {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      background-color: red;
+      color: #fff;
+    }
+
+    .btn-confirm:hover {
+      background-color: darkred;
+    }
+
+    .btn-cancel {
+      background-color: #bdc3c7;
+      color: #333;
+    }
+
+    .btn-cancel:hover {
+      background-color: #95a5a6;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .footer {
+      background: #f1f1f1;
+      padding: 1rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .footer a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
-<style>
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-box {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    max-width: 400px;
-    width: 90%;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-
-  .modal-buttons {
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: space-around;
-    gap: 1rem;
-  }
-
-  .btn-confirm {
-    background-color: red;
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .btn-confirm:hover {
-    background-color: darkred;
-  }
-
-  .btn-cancel {
-    background-color: #bdc3c7;
-    color: #333;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .btn-cancel:hover {
-    background-color: #95a5a6;
-  }
-
-  @keyframes fadeIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  .welcome-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .profile-thumbnail {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ddd;
-  }
-.chart-container {
-  max-width: 300px; /* previously 500px */
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-  .recent-logins, .recent {
-    margin-top: 2rem;
-  }
-
-</style>
 <body>
+
   <nav class="top-nav">
-    <h2>Asian College EIS Admin</h2>
-    <div class="menu">
-      <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
-      <ul id="menuItems" class="menuItems">
-        <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
-        <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
-        <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
-        <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
-        <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
-      </ul>
-    </div>
+    <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS Admin</h2>
+    <ul class="menuItems">
+      <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+      <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+      <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+      <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+      <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
+    </ul>
   </nav>
 
   <div class="dashboard">
     <div class="welcome-header">
-      <img src="<?php echo $displayPic; ?>" alt="Profile Picture" class="profile-thumbnail">
+      <img src="<?= $displayPic ?>" alt="Profile Picture" class="profile-thumbnail" />
       <div>
-        <h1>Welcome, <?php echo htmlspecialchars($name); ?>!</h1>
-        <small>Last login: <?php echo $lastLogin ? date('m/d/Y h:i A', strtotime($lastLogin)) : 'First time login'; ?></small>
+        <h1><?= $greeting ?>, <?= $name ?> 👋</h1>
+        <small>Last login: <?= $lastLogin ? date('m/d/Y h:i A', strtotime($lastLogin)) : 'First time login'; ?></small>
       </div>
     </div>
 
     <div class="stats">
       <div class="card">
-        <h2><?php echo $totalAdmins; ?></h2>
+        <h2><?= $totalAdmins ?></h2>
         <p>Total Admins</p>
       </div>
       <div class="card">
-        <h2><?php echo $totalEmployees; ?></h2>
+        <h2><?= $totalEmployees ?></h2>
         <p>Total Employees</p>
       </div>
     </div>
 
     <div class="chart-container">
-      <canvas id="userChart" width="300" height="300"></canvas>
+      <canvas id="userChart"></canvas>
     </div>
 
     <div class="quick-actions">
@@ -184,8 +296,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <h3>🕒 Recent Activity</h3>
       <?php while($row = mysqli_fetch_assoc($recentResult)): ?>
         <div class="recent-item">
-          <p><strong><?php echo htmlspecialchars($row['firstName'] . ' ' . $row['lastName']); ?></strong> added as <?php echo $row['role']; ?></p>
-          <small><?php echo date('m/d/Y g:i A', strtotime($row['registryDate'])); ?></small>
+          <p><strong><?= htmlspecialchars($row['firstName'] . ' ' . $row['lastName']) ?></strong> added as <?= $row['role'] ?></p>
+          <small><?= date('m/d/Y g:i A', strtotime($row['registryDate'])) ?></small>
         </div>
       <?php endwhile; ?>
     </div>
@@ -194,14 +306,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <h3>🧾 Recent Logins</h3>
       <?php while($log = mysqli_fetch_assoc($logins)): ?>
         <div class="recent-item">
-          <p><strong><?php echo htmlspecialchars($log['firstName'] . ' ' . $log['lastName']); ?></strong></p>
-          <small><?php echo date('m/d/Y g:i A', strtotime($log['last_login'])); ?></small>
+          <p><strong><?= htmlspecialchars($log['firstName'] . ' ' . $log['lastName']) ?></strong></p>
+          <small><?= date('m/d/Y g:i A', strtotime($log['last_login'])) ?></small>
         </div>
       <?php endwhile; ?>
     </div>
   </div>
 
-  <!-- Logout Confirmation Modal -->
+  <!-- Logout Modal -->
   <div id="logoutModal" class="modal-overlay">
     <div class="modal-box">
       <h3>Confirm Logout</h3>
@@ -213,60 +325,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
 
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const menuItems = document.getElementById('menuItems');
-    let menuOpen = false;
-
-    menuBtn.addEventListener('click', () => {
-      menuOpen = !menuOpen;
-      menuBtn.src = menuOpen ? 'assets/black_closeIcon.png' : 'assets/black_menuIcon.png';
-      menuItems.classList.toggle('menuOpen');
-    });
-
-    menuItems.addEventListener('click', () => {
-      menuOpen = false;
-      menuBtn.src = 'assets/black_menuIcon.png';
-      menuItems.classList.remove('menuOpen');
-    });
-
-    function confirmLogout() {
-      document.getElementById('logoutModal').style.display = 'flex';
-    }
-
-    function closeLogoutModal() {
-      document.getElementById('logoutModal').style.display = 'none';
-    }
-
-    function proceedLogout() {
-      window.location.href = "logout.php";
-    }
-
-    // Chart.js for Admins vs Employees
-    const ctx = document.getElementById('userChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Admins', 'Employees'],
-            datasets: [{
-                data: [<?php echo $totalAdmins; ?>, <?php echo $totalEmployees; ?>],
-                backgroundColor: ['#3498db', '#2ecc71'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' }
-            }
-        }
-    });
-  </script>
-
-<footer class="footer">
+  <footer class="footer">
   <div class="footer-content">
     <div class="footer-section">
-      <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
+      <p>&copy; <?php echo date("Y"); ?> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong>. All rights reserved.</p>
        <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
         IT Department
       </a>
@@ -274,7 +336,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <div class="footer-section quick-links">
       <a href="profile.php">👤 Profile</a>
-      <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
+      <a href="mailto:edfaburada.student@asiancollege.edu.ph">❓ Help</a>
+      <a href="mailto:jdacademia.student@asiancollege.edu.ph">📝 Feedback</a>
       <a href="#" onclick="confirmLogout()">🚪 Logout</a>
     </div>
 
@@ -296,5 +359,40 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   </div>
 </footer>
 
+  <script>
+    function confirmLogout() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function proceedLogout() {
+      window.location.href = "logout.php";
+    }
+
+    const ctx = document.getElementById('userChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Admins', 'Employees'],
+        datasets: [{
+          data: [<?= $totalAdmins ?>, <?= $totalEmployees ?>],
+          backgroundColor: ['#3498db', '#2ecc71'],
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>

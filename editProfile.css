@@ -131,6 +131,7 @@ body {
   padding: 0;
 }
 
+
 .profile-container {
   max-width: 800px;
   margin: 40px auto;
@@ -235,4 +236,52 @@ a.btn.btn-logout:hover {
 h1 {
     text-align: center;
     margin-top: 2rem;
+}
+
+#passwordForm {
+  background: #f9f9f9;
+  padding: 20px;
+  margin-top: 20px;
+  border: 2px solid blue;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#passwordForm h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 20px;
+  border-bottom: 2px dashed blue;
+  padding-bottom: 5px;
+}
+
+#passwordForm label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #444;
+}
+
+#passwordForm input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#passwordForm input[type="submit"] {
+  margin-top: 15px;
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#passwordForm p {
+  margin-top: 10px;
+  font-weight: bold;
 }

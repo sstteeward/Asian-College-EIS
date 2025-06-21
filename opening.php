@@ -14,7 +14,7 @@
     <div class="logo">
         <img src="assets/logo.png" alt="Asian College Logo" />
     </div>
-    <h1>Welcome to Asian College EIS</h1>
+    <h1>Welcome to <br><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS</h1>
     <form action="index.php" method="get">
         <button type="submit" name="open_login">Login</button>
     </form>

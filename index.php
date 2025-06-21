@@ -2,13 +2,17 @@
 session_start();
 $showLogin = false;
 $selectedRole = '';
+$loginErrorMessage = '';
 
 // Display error if login fails
 if (isset($_SESSION['login_error'])) {
     $showLogin = true;
+    $loginErrorMessage = $_SESSION['login_error'];
+
     if (isset($_SESSION['last_role'])) {
         $selectedRole = $_SESSION['last_role'];
     }
+
     unset($_SESSION['login_error']);
     unset($_SESSION['last_role']);
 }
@@ -18,11 +22,6 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
-
-<?php if (isset($_SESSION['reset_message'])): ?>
-    <div class="reset-message"><?php echo $_SESSION['reset_message']; ?></div>
-    <?php unset($_SESSION['reset_message']); ?>
-<?php endif; ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -41,7 +40,7 @@ if (empty($_SESSION['csrf_token'])) {
         <img src="assets/logo.png" alt="Asian College Logo" />
       </div>
       <div class="title">
-        <h1>Asian College EIS</h1>
+        <h1><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS</h1>
       </div>
     </header>
 
@@ -56,7 +55,7 @@ if (empty($_SESSION['csrf_token'])) {
 
     <section id="login-form" class="login <?= $showLogin ? '' : 'hidden' ?>">
       <?php if ($showLogin): ?>
-        <div class="error-message">⚠️ Invalid email, password, or role.</div>
+        <div class="error-message">⚠️ <?= htmlspecialchars($loginErrorMessage) ?></div>
       <?php endif; ?>
 
       <form action="login.php" method="post" autocomplete="off">
@@ -104,33 +103,19 @@ if (empty($_SESSION['csrf_token'])) {
     </div>
   </div>
 
-  <script>
-    const roleSelect = document.getElementById('role-select');
-    const loginForm = document.getElementById('login-form');
-    const roleInput = document.getElementById('role-input');
-    const showPasswordCheckbox = document.getElementById('show-password');
-    const passwordInput = document.getElementById('password');
-
-    roleSelect.addEventListener('change', () => {
-      const selectedRole = roleSelect.value;
-      if (selectedRole === 'admin' || selectedRole === 'employee') {
-        roleInput.value = selectedRole;
-        loginForm.classList.remove('hidden');
-      }
-    });
-
-    showPasswordCheckbox.addEventListener('change', () => {
-      passwordInput.type = showPasswordCheckbox.checked ? 'text' : 'password';
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      if (roleSelect.value) {
-        loginForm.classList.remove('hidden');
-      }
-    });
-  </script>
-
   <style>
+    .error-message {
+      background: #f0f8ff;
+      border-left: 5px solid #007bff;
+      color: #333;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 15px;
+      margin-top: 10px;
+      width: fit-content;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -191,5 +176,31 @@ if (empty($_SESSION['csrf_token'])) {
       text-decoration: underline;
     }
   </style>
+
+  <script>
+    const roleSelect = document.getElementById('role-select');
+    const loginForm = document.getElementById('login-form');
+    const roleInput = document.getElementById('role-input');
+    const showPasswordCheckbox = document.getElementById('show-password');
+    const passwordInput = document.getElementById('password');
+
+    roleSelect.addEventListener('change', () => {
+      const selectedRole = roleSelect.value;
+      if (selectedRole === 'admin' || selectedRole === 'employee') {
+        roleInput.value = selectedRole;
+        loginForm.classList.remove('hidden');
+      }
+    });
+
+    showPasswordCheckbox.addEventListener('change', () => {
+      passwordInput.type = showPasswordCheckbox.checked ? 'text' : 'password';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (roleSelect.value) {
+        loginForm.classList.remove('hidden');
+      }
+    });
+  </script>
 </body>
 </html>

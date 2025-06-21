@@ -16,34 +16,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $department = trim($_POST['department'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $sex = trim($_POST['sex'] ?? '');
-    $password = trim($_POST['password'] ?? ''); // NEW
+    $password = trim($_POST['password'] ?? ''); 
 
-    // Validate required fields
     if (
         empty($id) || empty($firstName) || empty($lastName) || empty($email) ||
-        empty($department) || empty($role) || empty($sex) || empty($password) // updated
+        empty($department) || empty($role) || empty($sex) || empty($password) 
     ) {
         header("Location: addemployee.php?error=missing");
         exit();
     }
 
-    // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         header("Location: addemployee.php?error=invalid_email");
         exit();
     }
 
-    // Format names
     $firstName = ucwords(strtolower(preg_replace('/\s+/', ' ', $firstName)));
     $middleName = ucwords(strtolower(preg_replace('/\s+/', ' ', $middleName)));
     $lastName = ucwords(strtolower(preg_replace('/\s+/', ' ', $lastName)));
 
-    // Hash password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
     $table = strtolower($role) === 'admin' ? 'admin_' : 'employeeuser';
 
-    // Check if ID or email already exists
     $checkSql = "SELECT 1 FROM $table WHERE employeeID = ? OR email = ? LIMIT 1";
     $stmtCheck = $conn->prepare($checkSql);
     $stmtCheck->bind_param("ss", $id, $email);
@@ -57,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     }
     $stmtCheck->close();
 
-    // Get admin ID who is adding the user
     $adminEmail = $_SESSION['email'];
     $stmtAdmin = $conn->prepare("SELECT employeeID FROM admin_ WHERE email = ? LIMIT 1");
     $stmtAdmin->bind_param("s", $adminEmail);
@@ -71,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         exit();
     }
 
-    // Insert record with password
     $insertSql = "INSERT INTO $table 
         (employeeID, firstName, middleName, lastName, email, department, sex, password, registryDate, addedBy) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";

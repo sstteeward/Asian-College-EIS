@@ -27,12 +27,12 @@ $firstName = htmlspecialchars($_SESSION['firstName']);
             <img src="assets/logo.png" alt="Asian College Logo" />
         </div>
         <div class="title">
-            <h3>Asian College EIS</h3>
+            <h3><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS</h3>
         </div>
     </div>
 
     <h1 class="welcome-text">Welcome, <?php echo $firstName; ?>!</h1>
-    <p class="fade-in delayed-1">You have successfully logged in to the <strong>Employee Information System</strong>.</p>
+    <p class="fade-in delayed-1">You have successfully logged in to the <br> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> Employee Information System</strong>.</p>
     <a href="<?php echo $dashboard; ?>" class="btn fade-in delayed-2">Proceed</a>
 </div>
 

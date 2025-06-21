@@ -81,7 +81,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body>
   <nav class="top-nav">
     <h2>Asian College EIS ADMIN</h2>
-    <img src="assets/logo2-removebg-preview.png" alt="Logo">
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
@@ -104,9 +103,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       </div>
 
       <div class="profile-details">
-
-        <label for="id">Employee ID:</label>
-        <input type="text" id="id" name="id" required />
 
         <label>First Name:</label>
         <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>

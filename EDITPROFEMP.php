@@ -22,7 +22,7 @@ $stmt->close();
 $passwordMessage = "";
 $showPasswordForm = false;
 
-// Update profile
+// Save Changes Form
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_changes'])) {
     $firstName = trim($_POST['firstName']);
     $middleName = trim($_POST['middleName']);
@@ -34,18 +34,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_changes'])) {
 
     if (!empty($_FILES["picture"]["name"])) {
         $targetDir = "uploads/";
-        $fileName = basename($_FILES["picture"]["name"]);
+        $fileName = uniqid() . "_" . basename($_FILES["picture"]["name"]);
         $targetFilePath = $targetDir . $fileName;
-        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+        $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
 
-        $allowedTypes = array('jpg', 'jpeg', 'png', 'gif');
-        if (in_array(strtolower($fileType), $allowedTypes)) {
+        if (in_array($fileType, $allowedTypes)) {
             move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath);
         } else {
-            $fileName = $user['picture'];
+            $fileName = $user['picture']; // fallback
         }
     } else {
-        $fileName = $user['picture'];
+        $fileName = $user['picture']; // no new upload
     }
 
     $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
@@ -54,19 +54,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_changes'])) {
     $stmt->execute();
     $stmt->close();
 
-    header("Location: viewProfile.php");
+    header("Location: VIEWPROFEMP.php");
     exit();
 }
 
-// Change password
+// Password Change Form
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
     $oldPassword = $_POST['oldPassword'];
     $newPassword = $_POST['newPassword'];
     $confirmPassword = $_POST['confirmPassword'];
     $showPasswordForm = true;
 
-    $checkQuery = "SELECT password FROM $table WHERE email = ?";
-    $stmt = $conn->prepare($checkQuery);
+    $stmt = $conn->prepare("SELECT password FROM $table WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -90,52 +89,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
         $showPasswordForm = false;
     }
 }
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="EDITPROFEMP.css">
+  <link rel="stylesheet" href="editProfile.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/LOGO for title.png">
   <title>Asian College EIS</title>
   <style>
-    .error-msg {
-      color: red;
-      font-weight: bold;
-      margin: 10px 0;
-    }
-    .success-msg {
-      color: green;
-      font-weight: bold;
-      margin: 10px 0;
-    }
+    .error-msg { color: red; font-weight: bold; margin: 10px 0; }
+    .success-msg { color: green; font-weight: bold; margin: 10px 0; }
     #passwordForm {
       background: #f5f5f5;
       border: 1px solid #ccc;
       padding: 15px;
       border-radius: 8px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
+
 <nav class="top-nav">
-  <h2>Asian College EIS Edit</h2>
-  <img src="assets/logo2-removebg-preview.png" alt="Logo">
+  <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS </h2>
   <div class="menu">
     <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
     <ul id="menuItems" class="menuItems">
-      <li><a href="HOMEEMP.php">🏠 Home</a></li>
-      <li><a href="NOTIFEMP.php">🔔 Notifications</a></li>
-      <li><a href="EMPLOYEEEMP.php">👨‍💼 Employee</a></li>
-      <li><a href="VIEWPROFEMP.php">👤 Profile</a></li>
+        <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
+        <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+        <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+        <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
     </ul>
   </div>
 </nav>
 
 <div class="profile-container">
   <h1>✏️ Edit Profile</h1>
+
   <form method="POST" enctype="multipart/form-data" class="profile-box">
     <div class="profile-picture">
       <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;">
@@ -144,16 +138,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
 
     <div class="profile-details">
       <label>First Name:</label>
-      <input type="text" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required>
+      <input type="text" name="firstName" value="<?= htmlspecialchars($user['firstName']); ?>" required>
 
       <label>Middle Name:</label>
-      <input type="text" name="middleName" value="<?php echo htmlspecialchars($user['middleName']); ?>">
+      <input type="text" name="middleName" value="<?= htmlspecialchars($user['middleName']); ?>">
 
       <label>Last Name:</label>
-      <input type="text" name="lastName" value="<?php echo htmlspecialchars($user['lastName']); ?>" required>
+      <input type="text" name="lastName" value="<?= htmlspecialchars($user['lastName']); ?>" required>
 
       <label>Department:</label>
-      <select id="department" name="department" required>
+      <select name="department" required>
         <option value="">-- Select Department --</option>
         <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
         <option value="CCSE" <?= $user['department'] == 'CCSE' ? 'selected' : '' ?>>CCSE</option>
@@ -163,37 +157,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
       </select>
 
       <label>Status:</label>
-      <input type="text" name="status" value="<?php echo htmlspecialchars($user['status']); ?>">
+      <input type="text" name="status" value="<?= htmlspecialchars($user['status']); ?>">
 
       <label>Contact Number:</label>
-      <input type="text" name="contactNumber" value="<?php echo htmlspecialchars($user['contactNumber']); ?>">
+      <input type="text" name="contactNumber" value="<?= htmlspecialchars($user['contactNumber']); ?>">
 
       <label>Address:</label>
-      <input type="text" name="address" value="<?php echo htmlspecialchars($user['address']); ?>">
+      <input type="text" name="address" value="<?= htmlspecialchars($user['address']); ?>">
 
       <br><br>
       <input type="submit" name="save_changes" value="💾 Save Changes" class="btn">
       <a href="VIEWPROFEMP.php" class="btn btn-logout">❌ Cancel</a>
-
-      <br><br>
-      <button type="button" onclick="togglePasswordForm()" class="btn" style="background-color:#ffc107;">🛠️ Change Password</button>
-
-      <div id="passwordForm" style="display: <?= $showPasswordForm ? 'block' : 'none' ?>; margin-top:20px;">
-        <h3>🔑 Change Password</h3>
-        <?php echo $passwordMessage; ?>
-
-        <label>Old Password:</label>
-        <input type="password" name="oldPassword" required>
-
-        <label>New Password:</label>
-        <input type="password" name="newPassword" required>
-
-        <label>Confirm New Password:</label>
-        <input type="password" name="confirmPassword" required>
-
-        <input type="submit" name="change_password" value="🔒 Change Password" class="btn">
-      </div>
     </div>
+  </form>
+
+  <!-- Password Change Form -->
+  <button type="button" onclick="togglePasswordForm()" class="btn" style="background-color:#ffc107;">🛠️ Change Password</button>
+
+  <form method="POST" class="profile-box" id="passwordForm" style="display: <?= $showPasswordForm ? 'block' : 'none' ?>;">
+    <h3>🔑 Change Password</h3>
+    <?= $passwordMessage; ?>
+
+    <label>Old Password:</label>
+    <input type="password" name="oldPassword" required>
+
+    <label>New Password:</label>
+    <input type="password" name="newPassword" required>
+
+    <label>Confirm New Password:</label>
+    <input type="password" name="confirmPassword" required>
+
+    <input type="submit" name="change_password" value="🔒 Change Password" class="btn">
   </form>
 </div>
 
@@ -212,5 +206,6 @@ function togglePasswordForm() {
   form.style.display = form.style.display === "none" ? "block" : "none";
 }
 </script>
+
 </body>
 </html>

@@ -1,11 +1,9 @@
 <?php
 include 'db.php';
 
-// Helper function to generate letter avatar with colored circle
 function generateLetterAvatar($letter) {
     $colors = ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
     $color = $colors[ord(strtoupper($letter)) % count($colors)];
-
     return "<div style='
         background-color: $color;
         color: white;
@@ -21,8 +19,53 @@ function generateLetterAvatar($letter) {
     '>" . strtoupper($letter) . "</div>";
 }
 
-$currentPage = basename($_SERVER['PHP_SELF']);
+function highlight($text, $search) {
+    if (empty($search)) return htmlspecialchars($text);
+    return preg_replace("/(" . preg_quote($search, '/') . ")/i", '<mark>$1</mark>', htmlspecialchars($text));
+}
 
+function displayUserRows($result, &$counter, $search, $role) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $id = urlencode($row['employeeID']);
+        $isAdmin = $role === 'admin';
+
+        echo "<tr>";
+        echo "<td>{$counter}</td>";
+
+        echo "<td>";
+        if (!empty($row['picture']) && file_exists('uploads/' . $row['picture'])) {
+            $pic = htmlspecialchars($row['picture']);
+            echo "<img src='uploads/$pic' alt='Profile' style='width:50px; height:50px; border-radius:50%; object-fit:cover;'>";
+        } else {
+            echo generateLetterAvatar($row['firstName'][0]);
+        }
+        echo "</td>";
+
+        echo "<td>" . htmlspecialchars($row['employeeID']) . "</td>";
+        echo "<td>" . highlight($row['firstName'], $search) . "</td>";
+        echo "<td>" . highlight($row['middleName'], $search) . "</td>";
+        echo "<td>" . highlight($row['lastName'], $search) . "</td>";
+        echo "<td>" . highlight($row['email'], $search) . "</td>";
+        echo "<td>" . highlight($row['department'], $search) . "</td>";
+        $counter++;
+    }
+}
+
+$currentPage = basename($_SERVER['PHP_SELF']);
+$search = trim($_GET['search'] ?? '');
+$safe_search = mysqli_real_escape_string($conn, $search);
+$search_clause = "";
+
+if (!empty($search)) {
+    $like = "'%$safe_search%'";
+    $search_clause = "WHERE 
+        employeeID LIKE $like OR
+        firstName LIKE $like OR
+        middleName LIKE $like OR
+        lastName LIKE $like OR
+        email LIKE $like OR
+        department LIKE $like";
+}
 ?>
 
 <!DOCTYPE html>
@@ -31,16 +74,27 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="employee.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="assets\logo.png" />
-  <title>Asian College EIS</title>
+  <link rel="icon" href="assets/logo.png" />
+  <title>Asian College EIS Admin</title>
+  <style>
+    .sticky-search {
+      position: sticky;
+      top: 70px;
+      background: #fff;
+      z-index: 100;
+      padding: 20px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
+
   <nav class="top-nav">
-    <h2>Asian College EIS</h2>
+    <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS</h2>
     <div class="menu">
       <img id="menuBtn" class="menuBtn" src="assets/black_menuIcon.png" alt="Menu Button" />
       <ul id="menuItems" class="menuItems">
-        <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
+     <li><a href="HOMEEMP.php" class="<?= $currentPage == 'HOMEEMP.php' ? 'active' : '' ?>">🏠 Home</a></li>
         <li><a href="NOTIFEMP.php" class="<?= $currentPage == 'NOTIFEMP.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
         <li><a href="EMPLOYEEEMP.php" class="<?= $currentPage == 'EMPLOYEEEMP.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
         <li><a href="VIEWPROFEMP.php" class="<?= $currentPage == 'VIEWPROFEMP.php' ? 'active' : '' ?>">👤 Profile</a></li>
@@ -48,108 +102,72 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </nav>
 
-  <div class="main-content">
-    <!-- Admin List -->
-    <section id="admin-list">
-      <h1 style="text-align: center;">Admin List</h1>
-      <table class="employee-table" cellspacing="0" cellpadding="5" border="1" style="width:100%; border-collapse: collapse;">
-        <thead>
-          <tr>
-            <th>Number</th>
-            <th>Picture</th>
-            <th>Employee ID</th>
-            <th>First Name</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Department</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-          $sql_admins = "SELECT * FROM admin_";
-          $result_admins = mysqli_query($conn, $sql_admins);
-          if ($result_admins && mysqli_num_rows($result_admins) > 0) {
-              $counter = 1;
-              while ($row = mysqli_fetch_assoc($result_admins)) {
-                  echo "<tr>";
-                  echo "<td>" . $counter++ . "</td>";
-                  
-                  echo "<td>";
-                  if (!empty($row['picture']) && file_exists('uploads/' . $row['picture'])) {
-                      echo "<img src='uploads/" . htmlspecialchars($row['picture']) . "' alt='Profile' style='width:50px; height:50px; border-radius:50%; object-fit:cover;'>";
-                  } else {
-                      echo generateLetterAvatar($row['firstName'][0]);
-                  }
-                  echo "</td>";
-                  echo "<td>" . htmlspecialchars($row['employeeID']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['firstName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
-              }
-          } else {
-              echo "<tr><td colspan='9' style='text-align:center;'>No Admins found.</td></tr>";
-          }
-          ?>
-        </tbody>
-      </table>
-    </section>
+  <!-- 🔍 Sticky Search Bar -->
+  <section class="sticky-search" style="text-align: center;">
+    <form method="GET" action="">
+      <input 
+        type="text" 
+        name="search" 
+        placeholder="Search by name, ID, email, department..." 
+        value="<?= htmlspecialchars($search) ?>" 
+        style="padding: 10px; width: 250px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;" 
+      />
+      <button 
+        type="submit" 
+        style="padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+        🔍 Search
+      </button>
+    </form>
+  </section>
 
-    <!-- Employee List -->
-    <section id="employee-list" style="margin-top: 60px;">
-      <h1 style="text-align: center;">Employee List</h1>
-      <table class="employee-table" cellspacing="0" cellpadding="5" border="1" style="width:100%; border-collapse: collapse;">
-        <thead>
-          <tr>
-            <th>Number</th>
-            <th>Picture</th>
-            <th>Employee ID</th>
-            <th>First Name</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Department</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-          $sql_employees = "SELECT * FROM employeeuser";
-          $result_employees = mysqli_query($conn, $sql_employees);
-          if ($result_employees && mysqli_num_rows($result_employees) > 0) {
-              $counter = 1;
-              while ($row = mysqli_fetch_assoc($result_employees)) {
-                  echo "<tr>";
-                  echo "<td>" . $counter++ . "</td>";
+  <section id="admin-list">
+    <h1 style="text-align: center; margin-top: 20px;">
+      <?= $search ? "Search Results for: <em>" . htmlspecialchars($search) . "</em>" : "All Users (Admins & Employees)" ?>
+    </h1>
 
-                  echo "<td>";
-                  if (!empty($row['picture']) && file_exists('uploads/' . $row['picture'])) {
-                      echo "<img src='uploads/" . htmlspecialchars($row['picture']) . "' alt='Profile' style='width:50px; height:50px; border-radius:50%; object-fit:cover;'>";
-                  } else {
-                      echo generateLetterAvatar($row['firstName'][0]);
-                  }
-                  echo "</td>";
+    <table class="employee-table" cellspacing="0" cellpadding="5" border="1" style="width:100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Picture</th>
+          <th>Employee ID</th>
+          <th>First Name</th>
+          <th>Middle Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Department</th>
 
-                  echo "<td>" . htmlspecialchars($row['employeeID']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['firstName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['middleName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                  echo "<td>" . htmlspecialchars($row['department']) . "</td>";
-              }
-          } else {
-              echo "<tr><td colspan='9' style='text-align:center;'>No Employees found.</td></tr>";
-          }
-          mysqli_close($conn);
-          ?>
-        </tbody>
-      </table>
-    </section>
-  </div>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+        $counter = 1;
+        $admin_result = mysqli_query($conn, "SELECT * FROM admin_ $search_clause");
+        $employee_result = mysqli_query($conn, "SELECT * FROM employeeuser $search_clause");
 
-    <!-- Logout Confirmation Modal -->
+        $admin_found = $admin_result && mysqli_num_rows($admin_result) > 0;
+        $employee_found = $employee_result && mysqli_num_rows($employee_result) > 0;
+
+        if ($admin_found) {
+            echo "<tr><td colspan='9' style='background:#f0f0f0; text-align:center; font-weight:bold;'>Admins</td></tr>";
+            displayUserRows($admin_result, $counter, $search, 'admin');
+        }
+
+        if ($employee_found) {
+            echo "<tr><td colspan='9' style='background:#f0f0f0; text-align:center; font-weight:bold;'>Employees</td></tr>";
+            displayUserRows($employee_result, $counter, $search, 'employee');
+        }
+
+        if (!$admin_found && !$employee_found) {
+            echo "<tr><td colspan='9' style='text-align:center;'>No matching results found.</td></tr>";
+        }
+
+        mysqli_close($conn);
+        ?>
+      </tbody>
+    </table>
+  </section>
+<!-- Logout Modal -->
   <div id="logoutModal" class="modal-overlay">
     <div class="modal-box">
       <h3>Confirm Logout</h3>
@@ -168,13 +186,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
-      if (menuOpen) {
-        menuBtn.src = 'assets/black_closeIcon.png'; 
-        menuItems.classList.add('menuOpen');
-      } else {
-        menuBtn.src = 'assets/black_menuIcon.png'; 
-        menuItems.classList.remove('menuOpen');
-      }
+      menuBtn.src = menuOpen ? 'assets/black_closeIcon.png' : 'assets/black_menuIcon.png';
+      menuItems.classList.toggle('menuOpen', menuOpen);
     });
 
     menuItems.addEventListener('click', () => {
@@ -183,7 +196,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       menuItems.classList.remove('menuOpen');
     });
 
-     function confirmLogout() {
+    function confirmLogout() {
       document.getElementById('logoutModal').style.display = 'flex';
     }
 
@@ -199,15 +212,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <footer class="footer">
   <div class="footer-content">
     <div class="footer-section">
-      <p>&copy; <?php echo date("Y"); ?> <strong>Asian College</strong>. All rights reserved.</p>
-      <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
+      <p>&copy; <?php echo date("Y"); ?> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong>. All rights reserved.</p>
+       <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
         IT Department
       </a>
     </div>
 
     <div class="footer-section quick-links">
       <a href="profile.php">👤 Profile</a>
-      <a href="mailto:stewardhumiwat@gmail.com">❓ Help</a>
+      <a href="mailto:edfaburada.student@asiancollege.edu.ph">❓ Help</a>
+      <a href="mailto:jdacademia.student@asiancollege.edu.ph">📝 Feedback</a>
       <a href="#" onclick="confirmLogout()">🚪 Logout</a>
     </div>
 
