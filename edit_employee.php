@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['role'])) {
 
 $email = $_SESSION['email'];
 $role = $_SESSION['role'];
-$table = $role === 'employee' ? 'admin_' : 'employeeuser';
+$table = $role === 'admin' ? 'admin_' : 'employeeuser';
 
 $query = "SELECT * FROM $table WHERE email = ?";
 $stmt = $conn->prepare($query);
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($_FILES["picture"]["name"])) {
         $targetDir = "uploads/";
-        $fileName = basename($_FILES["picture"]["name"]);
+        $fileName = uniqid() . "_" . basename($_FILES["picture"]["name"]);
         $targetFilePath = $targetDir . $fileName;
         $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
 
@@ -38,26 +38,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (in_array(strtolower($fileType), $allowedTypes)) {
             move_uploaded_file($_FILES["picture"]["tmp_name"], $targetFilePath);
         } else {
-            $fileName = $user['picture']; 
+            $fileName = $user['picture'];
         }
     } else {
-        $fileName = $user['picture']; 
+        $fileName = $user['picture'];
     }
 
     $updateQuery = "UPDATE $table SET firstName=?, middleName=?, lastName=?, department=?, status=?, contactNumber=?, address=?, picture=? WHERE email=?";
     $stmt = $conn->prepare($updateQuery);
     $stmt->bind_param("sssssssss", $firstName, $middleName, $lastName, $department, $status, $contactNumber, $address, $fileName, $email);
-    $stmt->execute();
-    $stmt->close();
 
-    header("Location: VIEWPROFEMP.php");
-    exit();
-
-    
+    if ($stmt->execute()) {
+        $stmt->close();
+        header("Location: VIEWPROFEMP.php");
+        exit();
+    } else {
+        echo "Error: " . $stmt->error;
+        $stmt->close();
+    }
 }
-$currentPage = basename($_SERVER['PHP_SELF']);
-?>
 
+$currentPage = basename($_SERVER['PHP_SELF']);
+$profileImage = !empty($user['picture']) ? "uploads/" . $user['picture'] : "default-avatar.png";
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -87,7 +90,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <h1>✏️ Edit Profile</h1>
     <form method="POST" enctype="multipart/form-data" class="profile-box">
       <div class="profile-picture">
-        <img src="uploads/<?php echo htmlspecialchars($user['picture']); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;">
+        <img src="<?php echo htmlspecialchars($profileImage); ?>" alt="Current Picture" style="width:120px;height:120px;border-radius:50%;object-fit:cover;">
         <input type="file" name="picture" accept="image/*">
       </div>
 
@@ -104,11 +107,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <label for="department">Department:</label>
         <select id="department" name="department" required>
           <option value="">-- Select Department --</option>
-          <option value="DPD">DPD</option>
-          <option value="CCSE">CCSE</option>
-          <option value="CBAA">CBAA</option>
-          <option value="CTHM">CTHM</option>
-          <option value="SHS">SHS</option>
+          <option value="DPD" <?= $user['department'] == 'DPD' ? 'selected' : '' ?>>DPD</option>
+          <option value="CCSE" <?= $user['department'] == 'CCSE' ? 'selected' : '' ?>>CCSE</option>
+          <option value="CBAA" <?= $user['department'] == 'CBAA' ? 'selected' : '' ?>>CBAA</option>
+          <option value="CTHM" <?= $user['department'] == 'CTHM' ? 'selected' : '' ?>>CTHM</option>
+          <option value="SHS" <?= $user['department'] == 'SHS' ? 'selected' : '' ?>>SHS</option>
         </select>
 
         <label>Status:</label>
@@ -122,7 +125,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         <br><br>
         <input type="submit" value="💾 Save Changes" class="btn">
-        <a href="profile.php" class="btn btn-logout">❌ Cancel</a>
+        <a href="VIEWPROFEMP.php" class="btn btn-logout">❌ Cancel</a>
       </div>
     </form>
   </div>
@@ -135,13 +138,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     menuBtn.addEventListener('click', () => {
       menuOpen = !menuOpen;
-      if (menuOpen) {
-        menuBtn.src = 'assets/closeIcon.png'; 
-        menuItems.classList.add('menuOpen');
-      } else {
-        menuBtn.src = 'assets/menuIcon.png'; 
-        menuItems.classList.remove('menuOpen');
-      }
+      menuBtn.src = menuOpen ? 'assets/closeIcon.png' : 'assets/menuIcon.png';
+      menuItems.classList.toggle('menuOpen', menuOpen);
     });
 
     menuItems.addEventListener('click', () => {
@@ -149,12 +147,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       menuBtn.src = 'assets/menuIcon.png';
       menuItems.classList.remove('menuOpen');
     });
-
-    function confirmLogout() {
-      if (confirm("Are you sure you want to logout?")) {
-        window.location.href = "logout.php";
-      }
-    }
   </script>
 </body>
 </html>

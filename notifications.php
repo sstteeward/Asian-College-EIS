@@ -2,6 +2,13 @@
 session_start();
 include 'db.php';
 
+
+
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
+    header("Location: index.php");
+    exit();
+}
+
 date_default_timezone_set('Asia/Manila');
 
 $filter = $_GET['filter'] ?? 'all';

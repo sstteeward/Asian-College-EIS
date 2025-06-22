@@ -1,5 +1,11 @@
 <?php
 include 'db.php';
+session_start();
+
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
+    header("Location: index.php");
+    exit();
+}
 
 function generateLetterAvatar($letter) {
     $colors = ['#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
@@ -48,7 +54,7 @@ function displayUserRows($result, &$counter, $search, $role) {
         echo "<td>" . highlight($row['email'], $search) . "</td>";
         echo "<td>" . highlight($row['department'], $search) . "</td>";
         echo "<td>
-                <a href='" . ($isAdmin ? "editADMIN.php" : "editADMIN.php") . "?id=$id'>
+                <a href='" . ($isAdmin ? "edit_employee.php" : "edit_employee.php") . "?id=$id'>
                   <button class='action-btn edit-btn'>Edit</button>
                 </a>
                 <a href='" . ($isAdmin ? "deleteADMIN.php" : "delete_employee.php") . "?id=$id' onclick='return confirm(\"Are you sure you want to delete this {$role}?\");'>
