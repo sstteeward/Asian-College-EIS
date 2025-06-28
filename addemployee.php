@@ -90,7 +90,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     }
 
     button[type="submit"] {
-      background-color: red;
+      background-color: blue;
       color: white;
       border: none;
       padding: 12px 25px;

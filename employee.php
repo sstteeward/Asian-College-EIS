@@ -54,7 +54,7 @@ function displayUserRows($result, &$counter, $search, $role) {
         echo "<td>" . highlight($row['email'], $search) . "</td>";
         echo "<td>" . highlight($row['department'], $search) . "</td>";
         echo "<td>
-                <a href='" . ($isAdmin ? "edit_employee.php" : "edit_employee.php") . "?id=$id'>
+                <a href='" . ($isAdmin ? "editADMIN.php" : "edit_employee.php") . "?id=$id'>
                   <button class='action-btn edit-btn'>Edit</button>
                 </a>
                 <a href='" . ($isAdmin ? "deleteADMIN.php" : "delete_employee.php") . "?id=$id' onclick='return confirm(\"Are you sure you want to delete this {$role}?\");'>
