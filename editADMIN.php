@@ -57,13 +57,12 @@ if (isset($_POST['update'])) {
   <meta charset="UTF-8">
   <link rel="stylesheet" href="editADMIN.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/LOGO for title.png">
-  <title>Edit | Asian College EIS Admin</title>
+  <link rel="icon" href="assets\logo.png">
+  <title>Edit | Asian College EIS</title>
 </head>
 <body>
 <nav class="top-nav">
   <h2>Asian College EIS Admin</h2>
-  <img src="assets/logo2-removebg-preview.png" alt="Logo">
   <div class="menu">
     <img id="menuBtn" class="menuBtn" src="assets/menuIcon.png" alt="Menu Button" />
     <ul id="menuItems" class="menuItems">

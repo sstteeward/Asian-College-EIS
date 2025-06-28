@@ -79,11 +79,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
   <div class="main-content">
   <section id="edit-admin">
-    <h1>✏️ Edit Admin</h1>
+    <h1>✏️ Edit Employee</h1>
     <form method="POST" enctype="multipart/form-data">
       
-      <label for="employeeID">Employee ID:</label>
-      <input type="text" id="employeeID" name="employeeID" value="<?= htmlspecialchars($row['employeeID']) ?>" required>
       
       <label for="firstname">First Name:</label>
       <input type="text" id="firstname" name="firstname" value="<?= htmlspecialchars($row['firstName']) ?>" required>
