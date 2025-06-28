@@ -103,7 +103,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     }
 
     button[type="submit"]:hover {
-      background-color: #E53E3E;
+      background-color: cornflowerblue;
     }
   </style>
 </head>

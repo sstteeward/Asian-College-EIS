@@ -7,6 +7,16 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Session timeout (30 mins)
+$timeoutDuration = 1800;
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeoutDuration) {
+    session_unset();
+    session_destroy();
+    header("Location: index.php");
+    exit();
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 date_default_timezone_set('Asia/Manila');
 $email = $_SESSION['email'];
 
@@ -21,6 +31,13 @@ $stmt->close();
 
 $name = htmlspecialchars($firstName);
 $displayPic = $profilePic && file_exists("uploads/" . $profilePic) ? "uploads/" . $profilePic : "avatar.php?name=" . urlencode($name);
+
+
+$completion = 0;
+if (!empty($profilePic)) $completion += 25;
+if (!empty($email)) $completion += 25;
+if (!empty($lastLogin)) $completion += 25;
+if (!empty($name)) $completion += 25;
 
 $totalAdmins = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM admin_"))['total'];
 $totalEmployees = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM employeeuser"))['total'];
@@ -42,9 +59,16 @@ $logins = mysqli_query($conn, "
     LIMIT 5
 ");
 
+$notifResult = mysqli_query($conn, "SELECT message, created_at FROM notifications ORDER BY created_at DESC LIMIT 3");
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 $hour = date('H');
 $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
+$dayMessage = match (true) {
+    $hour < 12 => "Hope you have a productive morning!",
+    $hour < 18 => "Keep going, you're doing great this afternoon!",
+    default => "Winding down? Here's your evening summary!"
+};
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,6 +100,7 @@ $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good
       list-style: none;
       display: flex;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .menuItems a {
@@ -99,6 +124,7 @@ $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good
       align-items: center;
       gap: 1rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
     .profile-thumbnail {
@@ -247,152 +273,164 @@ $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good
     .footer a:hover {
       text-decoration: underline;
     }
+
+    @media (max-width: 768px) {
+      .stats {
+        flex-direction: column;
+      }
+
+      .menuItems {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .chart-container {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <nav class="top-nav">
-    <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS Admin</h2>
-    <ul class="menuItems">
-      <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
-      <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
-      <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
-      <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
-      <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
-    </ul>
-  </nav>
+<nav class="top-nav">
+  <h2><strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong> EIS Admin</h2>
+  <ul class="menuItems">
+    <li><a href="home.php" class="<?= $currentPage == 'home.php' ? 'active' : '' ?>">🏠 Home</a></li>
+    <li><a href="notifications.php" class="<?= $currentPage == 'notifications.php' ? 'active' : '' ?>">🔔 Notifications</a></li>
+    <li><a href="employee.php" class="<?= $currentPage == 'employee.php' ? 'active' : '' ?>">👨‍💼 Employee</a></li>
+    <li><a href="addemployee.php" class="<?= $currentPage == 'addemployee.php' ? 'active' : '' ?>">➕ Add New Employee</a></li>
+    <li><a href="profile.php" class="<?= $currentPage == 'profile.php' ? 'active' : '' ?>">👤 Profile</a></li>
+  </ul>
+</nav>
 
-  <div class="dashboard">
-    <div class="welcome-header">
-      <img src="<?= $displayPic ?>" alt="Profile Picture" class="profile-thumbnail" />
-      <div>
-        <h1><?= $greeting ?>, <?= $name ?> 👋</h1>
-        <small>Last login: <?= $lastLogin ? date('m/d/Y h:i A', strtotime($lastLogin)) : 'First time login'; ?></small>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="card">
-        <h2><?= $totalAdmins ?></h2>
-        <p>Total Admins</p>
-      </div>
-      <div class="card">
-        <h2><?= $totalEmployees ?></h2>
-        <p>Total Employees</p>
-      </div>
-    </div>
-
-    <div class="chart-container">
-      <canvas id="userChart"></canvas>
-    </div>
-
-    <div class="quick-actions">
-      <a href="addemployee.php">➕ Add New Employee</a>
-      <a href="employee.php">👨‍💼 View Employees</a>
-      <a href="notifications.php">🔔 View Notifications</a>
-    </div>
-
-    <div class="recent">
-      <h3>🕒 Recent Activity</h3>
-      <?php while($row = mysqli_fetch_assoc($recentResult)): ?>
-        <div class="recent-item">
-          <p><strong><?= htmlspecialchars($row['firstName'] . ' ' . $row['lastName']) ?></strong> added as <?= $row['role'] ?></p>
-          <small><?= date('m/d/Y g:i A', strtotime($row['registryDate'])) ?></small>
-        </div>
-      <?php endwhile; ?>
-    </div>
-
-    <div class="recent-logins">
-      <h3>🧾 Recent Logins</h3>
-      <?php while($log = mysqli_fetch_assoc($logins)): ?>
-        <div class="recent-item">
-          <p><strong><?= htmlspecialchars($log['firstName'] . ' ' . $log['lastName']) ?></strong></p>
-          <small><?= date('m/d/Y g:i A', strtotime($log['last_login'])) ?></small>
-        </div>
-      <?php endwhile; ?>
+<div class="dashboard">
+  <div class="welcome-header">
+    <img src="<?= $displayPic ?>" alt="Profile Picture" class="profile-thumbnail" />
+    <div>
+      <h1><?= $greeting ?>, <?= $name ?> 👋</h1>
+      <small>Last login: <?= $lastLogin ? date('m/d/Y h:i A', strtotime($lastLogin)) : 'First time login'; ?></small><br>
+      <small><?= $dayMessage ?></small>
     </div>
   </div>
 
-  <!-- Logout Modal -->
-  <div id="logoutModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3>Confirm Logout</h3>
-      <p>Are you sure you want to logout?</p>
-      <div class="modal-buttons">
-        <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
-        <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
-      </div>
+  <div class="stats">
+    <div class="card">
+      <h2><?= $totalAdmins ?></h2>
+      <p>Total Admins</p>
+    </div>
+    <div class="card">
+      <h2><?= $totalEmployees ?></h2>
+      <p>Total Employees</p>
+    </div>
+    <div class="card">
+      <p><strong>Profile Completion</strong></p>
+      <progress value="<?= $completion ?>" max="100" style="width: 100%;"></progress>
+      <small><?= $completion ?>% complete</small>
     </div>
   </div>
 
-  <footer class="footer">
+  <div class="chart-container">
+    <canvas id="userChart"></canvas>
+  </div>
+
+  <div class="quick-actions">
+    <a href="addemployee.php">➕ Add New Employee</a>
+    <a href="employee.php">👨‍💼 View Employees</a>
+    <a href="notifications.php">🔔 View Notifications</a>
+    <a href="logs.php">📜 View Logs</a>
+  </div>
+
+  <div class="recent">
+    <h3>🕒 Recent Activity</h3>
+    <?php while($row = mysqli_fetch_assoc($recentResult)): ?>
+      <div class="recent-item">
+        <p><strong><?= htmlspecialchars($row['firstName'] . ' ' . $row['lastName']) ?></strong> added as <?= $row['role'] ?></p>
+        <small><?= date('m/d/Y g:i A', strtotime($row['registryDate'])) ?></small>
+      </div>
+    <?php endwhile; ?>
+  </div>
+
+  <div class="recent-logins">
+    <h3>🧾 Recent Logins</h3>
+    <?php while($log = mysqli_fetch_assoc($logins)): ?>
+      <div class="recent-item">
+        <p><strong><?= htmlspecialchars($log['firstName'] . ' ' . $log['lastName']) ?></strong></p>
+        <small><?= date('m/d/Y g:i A', strtotime($log['last_login'])) ?></small>
+      </div>
+    <?php endwhile; ?>
+  </div>
+
+  <div class="recent-logins">
+    <h3>🔔 Recent Notifications</h3>
+    <?php while($notif = mysqli_fetch_assoc($notifResult)): ?>
+      <div class="recent-item">
+        <p><?= htmlspecialchars($notif['message']) ?></p>
+        <small><?= date('m/d/Y g:i A', strtotime($notif['created_at'])) ?></small>
+      </div>
+    <?php endwhile; ?>
+  </div>
+</div>
+
+<div id="logoutModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <div class="modal-buttons">
+      <button onclick="proceedLogout()" class="btn-confirm">Yes, Logout</button>
+      <button onclick="closeLogoutModal()" class="btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
   <div class="footer-content">
-    <div class="footer-section">
-      <p>&copy; <?php echo date("Y"); ?> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong>. All rights reserved.</p>
-       <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold; color: #007BFF; text-decoration: none;">
-        IT Department
-      </a>
-    </div>
-
-    <div class="footer-section quick-links">
-      <a href="profile.php">👤 Profile</a>
-      <a href="mailto:edfaburada.student@asiancollege.edu.ph">❓ Help</a>
-      <a href="mailto:jdacademia.student@asiancollege.edu.ph">📝 Feedback</a>
+    <p>&copy; <?= date("Y") ?> <strong style="color: red;">Asian</strong> <strong style="color: blue;">College</strong>. All rights reserved.
+      <a href="mailto:stewardhumiwat@gmail.com" style="font-weight: bold;">IT Department</a>
+    </p>
+    <div>
+      <a href="profile.php">👤 Profile</a> |
+      <a href="mailto:edfaburada.student@asiancollege.edu.ph">❓ Help</a> |
+      <a href="mailto:jdacademia.student@asiancollege.edu.ph">📝 Feedback</a> |
       <a href="#" onclick="confirmLogout()">🚪 Logout</a>
     </div>
-
-    <div class="footer-section social-links">
-      <a href="https://www.instagram.com/asiancollegedgte/" target="_blank" rel="noopener" aria-label="Instagram">
-        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#E4405F">
-          <path d="M7.75 2A5.75 5.75 0 002 7.75v8.5A5.75 5.75 0 007.75 22h8.5A5.75 5.75 0 0022 16.25v-8.5A5.75 5.75 0 0016.25 2h-8.5zm0 1.5h8.5a4.25 4.25 0 014.25 4.25v8.5a4.25 4.25 0 01-4.25 4.25h-8.5a4.25 4.25 0 01-4.25-4.25v-8.5a4.25 4.25 0 014.25-4.25zm4.25 3.75a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 1.5a3 3 0 110 6 3 3 0 010-6zm4.75-.375a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0z"/>
-        </svg>
-      </a>
-      <a href="https://www.facebook.com/AsianCollegeDumaguete" target="_blank" rel="noopener" aria-label="Facebook">
-        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" fill="#1877F2" viewBox="0 0 24 24">
-          <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.406.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.466.099 2.796.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.31h3.588l-.467 3.622h-3.121V24h6.116c.73 0 1.324-.593 1.324-1.324V1.325c0-.732-.593-1.325-1.324-1.325z"/>
-        </svg>
-      </a>
-      <a href="https://asiancollege.edu.ph" target="_blank" aria-label="Website">
-        <img src="assets/cropped-favicon-512-192x192.png" alt="Website">
-      </a>
-    </div>
+    <small style="display:block;margin-top:10px;">Build v1.0.0 | Updated: <?= date("F Y"); ?></small>
   </div>
 </footer>
 
-  <script>
-    function confirmLogout() {
-      document.getElementById('logoutModal').style.display = 'flex';
-    }
+<script>
+  function confirmLogout() {
+    document.getElementById('logoutModal').style.display = 'flex';
+  }
 
-    function closeLogoutModal() {
-      document.getElementById('logoutModal').style.display = 'none';
-    }
+  function closeLogoutModal() {
+    document.getElementById('logoutModal').style.display = 'none';
+  }
 
-    function proceedLogout() {
-      window.location.href = "logout.php";
-    }
+  function proceedLogout() {
+    window.location.href = "logout.php";
+  }
 
-    const ctx = document.getElementById('userChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Admins', 'Employees'],
-        datasets: [{
-          data: [<?= $totalAdmins ?>, <?= $totalEmployees ?>],
-          backgroundColor: ['#3498db', '#2ecc71'],
-          borderColor: '#fff',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
+  const ctx = document.getElementById('userChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Admins', 'Employees'],
+      datasets: [{
+        data: [<?= $totalAdmins ?>, <?= $totalEmployees ?>],
+        backgroundColor: ['#3498db', '#2ecc71'],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
         }
       }
-    });
-  </script>
+    }
+  });
+</script>
 </body>
 </html>
